@@ -20,7 +20,7 @@
 ## Project Description
 * Why is it important or interesting to you?
   * Because games are fun
-  * Rogue-likes are fun
+  * Turnased RPG's are fun
 * What languages/tools/technologies do you plan to use?
   * OpenGL - graphics tool (GLUT library) - (GLUT is event driven)
   * C++11 - Language
