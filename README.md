@@ -18,16 +18,21 @@
 > * All project phases are to be submitted to this GitHub repository. You should modify this README file to reflect the different phases of the project. In addition, you should regularly hold sprint meetings with your group.
 
 ## Project Description
- > Your project description should summarize the project you are proposing. Be sure to include
- > * Why is it important or interesting to you?
- > * What languages/tools/technologies do you plan to use? (This list may change over the course of the project)
- >   * [toolname](link) - Short description
- > * What will be the input/output of your project?
- > * What are the two design patterns you will be using? For each design pattern you must explain in 4-5 sentences:
- >   * Why you picked this pattern and what feature you will implement with it
- >   * What problem you anticipate encountering when implementing your project that you will solve using the design pattern
- >   * Why the chosen design pattern will lead to a good solution to that problem
- > * This description should be in enough detail that the TA/instructor can determine the complexity of the project and if it is sufficient for the team members to complete in the time allotted. 
+* Why is it important or interesting to you?
+  * Because games are fun
+  * Rogue-likes are fun
+* What languages/tools/technologies do you plan to use?
+  * OpenGL - graphics tool (GLUT library) - (GLUT is event driven)
+  * C++11 - Language
+* What will be the input/output of your project?
+  * GLUT library will handle keyboard and mouse input events
+  * GLUT will display changes to the user graphically
+* What are the design patterns you will be using? For each design pattern you must:
+  * Explain in 3 - 5 sentences why you picked this pattern and what feature you will implement with it
+   * Abstract Factory:
+     This chooses what kind of monster to spawn and the quantity. For example, if a user is within a specific region of the map then choose a monster that represents that region. This design pattern will allow us to keep track of how regions of the map interact with the quantity and type of monsters without producing redundant code.
+  * Composite:
+   * This will handle our basic class system in the game for both allies and enemies. We chose composite because it makes it easier to structure and maintain our ally and enemy class systems. Composite allows us to alter and handle various groups of characteristics shared between certain characters.
 
  > ## Phase II
  > In addition to completing the "Class Diagram" section below, you will need to 
