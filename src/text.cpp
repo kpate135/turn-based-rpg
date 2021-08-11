@@ -1,0 +1,281 @@
+
+#include <stdlib.h>
+#include <string>
+#include <GL/glut.h>
+#include <iostream>
+
+
+
+// 800 x 600
+
+int STEP = 0;
+
+GLubyte space[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+GLubyte choice[] = {
+                    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                    0xff, 0xff, 0xff
+};
+
+
+// TODO: Add textbox
+GLubyte letters[][13] = {
+{0x00, 0x00, 0xc3, 0xc3, 0xc3, 0xc3, 0xff, 0xc3, 0xc3, 0xc3, 0x66, 0x3c, 0x18}, // A
+{0x00, 0x00, 0xfe, 0xc7, 0xc3, 0xc3, 0xc7, 0xfe, 0xc7, 0xc3, 0xc3, 0xc7, 0xfe},  // B
+{0x00, 0x00, 0x7e, 0xe7, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xe7, 0x7e},  // C
+{0x00, 0x00, 0xfc, 0xce, 0xc7, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc7, 0xce, 0xfc}, 
+{0x00, 0x00, 0xff, 0xc0, 0xc0, 0xc0, 0xc0, 0xfc, 0xc0, 0xc0, 0xc0, 0xc0, 0xff}, 
+{0x00, 0x00, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xfc, 0xc0, 0xc0, 0xc0, 0xff}, 
+{0x00, 0x00, 0x7e, 0xe7, 0xc3, 0xc3, 0xcf, 0xc0, 0xc0, 0xc0, 0xc0, 0xe7, 0x7e}, 
+{0x00, 0x00, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xff, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3}, 
+{0x00, 0x00, 0x7e, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x7e}, 
+{0x00, 0x00, 0x7c, 0xee, 0xc6, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06}, 
+{0x00, 0x00, 0xc3, 0xc6, 0xcc, 0xd8, 0xf0, 0xe0, 0xf0, 0xd8, 0xcc, 0xc6, 0xc3}, 
+{0x00, 0x00, 0xff, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0}, 
+{0x00, 0x00, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xdb, 0xff, 0xff, 0xe7, 0xc3}, 
+{0x00, 0x00, 0xc7, 0xc7, 0xcf, 0xcf, 0xdf, 0xdb, 0xfb, 0xf3, 0xf3, 0xe3, 0xe3}, 
+{0x00, 0x00, 0x7e, 0xe7, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xe7, 0x7e}, 
+{0x00, 0x00, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xfe, 0xc7, 0xc3, 0xc3, 0xc7, 0xfe}, 
+{0x00, 0x00, 0x3f, 0x6e, 0xdf, 0xdb, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0x66, 0x3c}, 
+{0x00, 0x00, 0xc3, 0xc6, 0xcc, 0xd8, 0xf0, 0xfe, 0xc7, 0xc3, 0xc3, 0xc7, 0xfe}, 
+{0x00, 0x00, 0x7e, 0xe7, 0x03, 0x03, 0x07, 0x7e, 0xe0, 0xc0, 0xc0, 0xe7, 0x7e}, 
+{0x00, 0x00, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0xff}, 
+{0x00, 0x00, 0x7e, 0xe7, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3}, 
+{0x00, 0x00, 0x18, 0x3c, 0x3c, 0x66, 0x66, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3}, 
+{0x00, 0x00, 0xc3, 0xe7, 0xff, 0xff, 0xdb, 0xdb, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3}, 
+{0x00, 0x00, 0xc3, 0x66, 0x66, 0x3c, 0x3c, 0x18, 0x3c, 0x3c, 0x66, 0x66, 0xc3}, 
+{0x00, 0x00, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x3c, 0x3c, 0x66, 0x66, 0xc3}, 
+{0x00, 0x00, 0xff, 0xc0, 0xc0, 0x60, 0x30, 0x7e, 0x0c, 0x06, 0x03, 0x03, 0xff}
+};
+
+
+class Scene: {
+
+	// animation on top
+	// description
+	// choices
+};
+
+// Start 
+class MenuScene;
+
+// class InventoryScene;
+
+// class CutScene;
+
+class BackgroundScene;
+class BattleScene;
+
+
+std::string current_scene = "start";
+
+std::string test = "";
+std::string test2 = "";
+std::string test3 = "";
+
+// 0-3
+int USR_CHOICE = 0;
+
+GLuint fontOffset;
+
+void makeRasterFont(void)
+{
+   GLuint i, j;
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+   fontOffset = glGenLists(128);
+   for (i = 0,j = 'A'; i < 26; i++,j++) {
+      glNewList(fontOffset + j, GL_COMPILE);
+      glBitmap(8, 13, 0.0, 2.0, 10.0, 0.0, letters[i]);
+      glEndList();
+   }
+
+   glNewList(fontOffset + ' ', GL_COMPILE);
+   glBitmap(8, 13, 0.0, 2.0, 10.0, 0.0, space);
+   // glBitmap(8, 13, 0.0, 2.0, 10.0, 0.0, choice);
+   glEndList();
+}
+
+void init(void)
+{
+   glShadeModel (GL_FLAT);
+   makeRasterFont();
+}
+
+void printString(const char *s, int length)
+{
+   glPushAttrib(GL_LIST_BIT);
+   glListBase(fontOffset);
+   // for (int i=0; i < length ; i++) {
+       // std::cout << (GLubyte *) s+i << std::endl;
+   // };
+   glCallLists((GLsizei) length, GL_UNSIGNED_BYTE, (GLubyte *) s);
+   glPopAttrib();
+}
+
+
+/* Everything above this line could be in a library 
+ * that defines a font.  To make it work, you've got 
+ * to call makeRasterFont() before you start making 
+ * calls to printString().
+ */
+void display(void)
+{
+   GLfloat white[3] = { 1.0, 1.0, 1.0 };
+
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   glColor3fv(white);
+
+   glRasterPos2i(130, 150);
+
+   std::cout << "test: " << test << std::endl;
+   printString(test.c_str(), test.size());
+
+   // glRasterPos2i(20, 40);
+   // printString(test2.c_str(), test.size());
+   glFlush();
+}
+
+void display2(void)
+{
+   GLfloat white[3] = { 1.0, 1.0, 1.0 };
+
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   glColor3fv(white);
+
+   glRasterPos2i(20, 280 - 100);
+
+   std::cout << "test2: " << test2 << std::endl;
+   printString(test.c_str(), test.size());
+
+   glRasterPos2i(20, 240 - 100);
+   printString(test2.c_str(), test.size());
+
+   glRasterPos2i(20, 220 - 100);
+   printString(test3.c_str(), test.size());
+
+   glFlush();
+
+};
+
+void reshape(int w, int h)
+{
+   glViewport(0, 0, (GLsizei) w, (GLsizei) h);
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   glOrtho (0.0, w, 0.0, h, -1.0, 1.0);
+   glMatrixMode(GL_MODELVIEW);
+}
+
+void renderFn() {
+
+    if (STEP % 150000 == 0) {
+        if (current_scene == "start") {
+            test = "START";
+            test2 = "";
+
+            display();
+        };
+
+        if (current_scene == "yes") {
+
+            // Description of scene
+            test =  "YOU ARE IN AN EMPTY ROOM.";
+
+	    // Options
+            test2 = " LOOK AROUND AND PONDER.";
+            test3 = " YOU GIVE UP";
+
+            if (USR_CHOICE == 0){
+                test2 = "O" + test2;
+            }
+            else if (USR_CHOICE == 1) {
+                test3 = "O" + test3;
+            };
+
+            display2();
+        };
+    }
+
+    STEP += 1;
+};
+
+void keyboard(unsigned char key, int x, int y)
+{
+
+   std::cout << "key: " << key << std::endl;
+
+   if (key == 'a') {
+       std::cout << "switching scene" << std::endl;
+       current_scene = "yes";
+   }
+
+   /*
+   switch (key) {
+      case 'a':
+          current_scene = "yes";
+      case 27:
+          // current_scene = "yes";
+         std::cout << "key: " << key << std::endl;
+         std::cout <<"exiting" << std::endl;
+         exit(0);
+   }
+   */
+
+}
+
+void specialKeyboard(int key, int x, int y) {
+
+    if (key == GLUT_KEY_UP) {
+        if (USR_CHOICE == 0) {
+            USR_CHOICE = 1;
+        }
+
+        else if (USR_CHOICE == 1) {
+            USR_CHOICE = 0;
+        };
+
+        std::cout << "pressing up key: " << std::endl;
+    }
+
+    else if (key == GLUT_KEY_DOWN) {
+
+        if (USR_CHOICE == 1) {
+            USR_CHOICE = 0;
+        }
+
+        else if (USR_CHOICE == 0) {
+            USR_CHOICE = 1;
+        };
+
+        std::cout << "pressing down key: " << std::endl;
+    }
+};
+
+
+/*  Main Loop
+ *  Open window with initial window size, title bar, 
+ *  RGBA display mode, and handle input events.
+ */
+int main(int argc, char** argv)
+{
+   glutInit(&argc, argv);
+   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+   glutInitWindowSize(800, 600);
+   glutInitWindowPosition(100, 100);
+   glutCreateWindow(argv[0]);
+   init();
+   glutReshapeFunc(reshape);
+   glutKeyboardFunc(keyboard);
+   glutSpecialFunc(specialKeyboard);
+
+   glutDisplayFunc(renderFn);
+
+   int time = 0;
+   
+   glutIdleFunc(renderFn);
+
+   glutMainLoop();
+
+   return 0;
+}
