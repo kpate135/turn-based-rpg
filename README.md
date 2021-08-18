@@ -20,6 +20,7 @@
  
 ## Class Diagram
 ![uml1](FactoryUML.jpg "FactoryUML")
+The Factory UML is showcasing the Factories we have planned for populating enemies (Entity) and allies (characters) as well as equipment which includes PowerGems and Armor.
 
 ![uml2](Scenes.jpg "Scenes")
 The Abstract Scene acts as your abstract factory. There are four concrete factories: Battle Scene, Dialogue Scene, Victory Scene and Game Over Scene.
