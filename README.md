@@ -19,6 +19,10 @@
     * This will handle our basic class system in the game for both allies and enemies. We chose composite because it makes it easier to structure and maintain our ally and enemy class systems. Composite allows us to alter and handle various groups of characteristics shared between certain characters.
  
 ## Class Diagram
+![uml1](ClassUML.jpg "ClassUML")
+This showcases the internals of the player and enemy stats and their related interfaces to be used throughout our game. 
+The ACTION class will be used with the strategy desgin pattern which will be used to choose which action algorithm to use when a player or enemy acts.
+
 ![uml1](FactoryUML.jpg "FactoryUML")
 The Factory UML is showcasing the Factories we have planned for populating enemies (Entity) and allies (characters) as well as equipment which includes PowerGems and Armor.
 
