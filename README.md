@@ -31,9 +31,14 @@
 ## Class Diagram
  > Include a class diagram(s) for each design pattern and a description of the diagram(s). Your class diagram(s) should include all the main classes you plan for the project. This should be in sufficient detail that another group could pick up the project this point and successfully complete it. Use proper OMT notation (as discussed in the course slides). You may combine multiple design patterns into one diagram if you'd like, but it needs to be clear which portion of the diagram represents which design pattern (either in the diagram or in the description). 
  
-
 ![uml1](FactoryUML.jpg "FactoryUML")
+
+
 ![uml2](Scenes.jpg "Scenes")
+The Abstract Scene acts as your abstract factory. There are four concrete factories: Battle Scene, Dialogue Scene, Victory Scene and Game Over Scene.
+Each factory creates a Background, Character Sprite, and On-Screen text objects. In the UML diagram you can see how the factory is implemented on
+the top right.
+
 
  > ## Phase III
  > You will need to schedule a check-in with the TA (during lab hours or office hours). Your entire team must be present. 
