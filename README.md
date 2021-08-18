@@ -18,7 +18,7 @@
   * Composite:
     * This will handle our basic class system in the game for both allies and enemies. We chose composite because it makes it easier to structure and maintain our ally and enemy class systems. Composite allows us to alter and handle various groups of characteristics shared between certain characters.
  
-
+## Class Diagram
 ![uml1](FactoryUML.jpg "FactoryUML")
 ![uml2](Scenes.jpg "Scenes")
 
