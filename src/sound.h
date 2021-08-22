@@ -1,10 +1,15 @@
 #include <ao/ao.h>
 #include <mpg123.h>
+#include <string>
+#include <thread>
 
 #define BITS 8
 
-int main(int argc, char *argv[])
+void playSfx(std::string fName, bool *loopSong, bool *threadLife)
 {
+
+    *loopSong = true;
+
     mpg123_handle *mh;
     unsigned char *buffer;
     size_t buffer_size;
@@ -18,9 +23,6 @@ int main(int argc, char *argv[])
     int channels, encoding;
     long rate;
 
-    if(argc < 2)
-        exit(0);
-
     /* initializations */
     ao_initialize();
     driver = ao_default_driver_id();
@@ -30,7 +32,7 @@ int main(int argc, char *argv[])
     buffer = (unsigned char*) malloc(buffer_size * sizeof(unsigned char));
 
     /* open the file and get the decoding format */
-    mpg123_open(mh, argv[1]);
+    mpg123_open(mh, fName.c_str());
     mpg123_getformat(mh, &rate, &channels, &encoding);
 
     /* set the output format and open the output device */
@@ -42,8 +44,9 @@ int main(int argc, char *argv[])
     dev = ao_open_live(driver, &format, NULL);
 
     /* decode and play */
-    while (mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK)
-        ao_play(dev, buffer, done);
+    while ((mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK) && (*threadLife == true))
+
+        ao_play(dev, reinterpret_cast<char*>(buffer), done);
 
     /* clean up */
     free(buffer);
@@ -53,5 +56,11 @@ int main(int argc, char *argv[])
     mpg123_exit();
     ao_shutdown();
 
-    return 0;
+    *loopSong = false;
 }
+
+/*
+int main(int argc, char** argv) {
+    playSfx("sounds/title_1.mp3");
+};
+*/

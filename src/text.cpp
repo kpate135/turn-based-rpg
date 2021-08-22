@@ -1,28 +1,32 @@
-
 #include <stdlib.h>
 #include <string>
 #include <GL/glut.h>
 #include <iostream>
+#include "sprite/Tavern_Scene.c"
+#include "sprite/dialogue_box.c"
+#include "sound.h"
+#include "sprite/logo.c"
+#include "sprite/BANDIT.c"
+#include "sprite/start_bg.c"
+#include "sprite/SPIDER.c"
+#include "sprite/SKELETON.c"
+#include "sprite/COUGHBIE.c"
 
-
-
-// 800 x 600
+#include <thread>
 
 int STEP = 0;
+std::string current_scene = "start";
+std::string test = "";
+std::string test2 = "";
+std::string test3 = "";
+int USR_CHOICE = 0;
 
 GLubyte space[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-GLubyte choice[] = {
-                    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-                    0xff, 0xff, 0xff
-};
-
-
-// TODO: Add textbox
 GLubyte letters[][13] = {
 {0x00, 0x00, 0xc3, 0xc3, 0xc3, 0xc3, 0xff, 0xc3, 0xc3, 0xc3, 0x66, 0x3c, 0x18}, // A
-{0x00, 0x00, 0xfe, 0xc7, 0xc3, 0xc3, 0xc7, 0xfe, 0xc7, 0xc3, 0xc3, 0xc7, 0xfe},  // B
-{0x00, 0x00, 0x7e, 0xe7, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xe7, 0x7e},  // C
+{0x00, 0x00, 0xfe, 0xc7, 0xc3, 0xc3, 0xc7, 0xfe, 0xc7, 0xc3, 0xc3, 0xc7, 0xfe}, // B
+{0x00, 0x00, 0x7e, 0xe7, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xe7, 0x7e}, // C
 {0x00, 0x00, 0xfc, 0xce, 0xc7, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc7, 0xce, 0xfc}, 
 {0x00, 0x00, 0xff, 0xc0, 0xc0, 0xc0, 0xc0, 0xfc, 0xc0, 0xc0, 0xc0, 0xc0, 0xff}, 
 {0x00, 0x00, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0xfc, 0xc0, 0xc0, 0xc0, 0xff}, 
@@ -49,33 +53,6 @@ GLubyte letters[][13] = {
 };
 
 
-class Scene: {
-
-	// animation on top
-	// description
-	// choices
-};
-
-// Start 
-class MenuScene;
-
-// class InventoryScene;
-
-// class CutScene;
-
-class BackgroundScene;
-class BattleScene;
-
-
-std::string current_scene = "start";
-
-std::string test = "";
-std::string test2 = "";
-std::string test3 = "";
-
-// 0-3
-int USR_CHOICE = 0;
-
 GLuint fontOffset;
 
 void makeRasterFont(void)
@@ -96,21 +73,522 @@ void makeRasterFont(void)
    glEndList();
 }
 
-void init(void)
-{
-   glShadeModel (GL_FLAT);
-   makeRasterFont();
-}
+
 
 void printString(const char *s, int length)
 {
    glPushAttrib(GL_LIST_BIT);
    glListBase(fontOffset);
-   // for (int i=0; i < length ; i++) {
-       // std::cout << (GLubyte *) s+i << std::endl;
-   // };
    glCallLists((GLsizei) length, GL_UNSIGNED_BYTE, (GLubyte *) s);
    glPopAttrib();
+}
+
+
+int BACKGROUND_BORDER = 20; // X pos
+int TEXT_BOX_BORDER = 25+40; // X pos
+bool loopSong = false;
+
+bool threadLife = true;
+
+std::thread sfxThread;
+
+
+class Scene {
+    public:
+        Scene(){};
+        virtual void make();
+};
+
+class DialogueBox {
+
+    static const int frameCount = DIALOGUE_BOX_FRAME_COUNT;
+    static const int frameWidth = DIALOGUE_BOX_FRAME_WIDTH;
+    static const int frameHeight = DIALOGUE_BOX_FRAME_HEIGHT;
+
+    GLubyte sprite[frameHeight][frameWidth][4];
+
+
+    std::string text;
+
+    const uint32_t *data;
+
+    public:
+
+
+        DialogueBox() {
+            
+            uint32_t red_mask = 0x000000ff;
+            int row = frameHeight;
+
+            this->data = &dialogue_box_data[0][0];
+            for (unsigned int i=0; i < this->frameWidth*this->frameHeight; i++) {
+
+                unsigned int img_red = red_mask & *(this->data + i);
+
+                // Bit shifting for 2 slots on hexadecimal
+                // per color each position on hexidecimal is 4 bits.
+                // Apply the red mask to get back decimal value
+                // to obtain 0-255 rgb format
+                unsigned int img_green = red_mask & (*(this->data + i) >> 4*2);
+                unsigned int img_blue = red_mask & (*(this->data + i) >> 4*4);
+                unsigned int img_alpha = red_mask & (*(this->data + i) >> 4*6);
+
+                int col = i % (this->frameWidth);
+
+                if (i % this->frameWidth == 0) {
+                    row -= 1;
+                }
+
+                // Row and on this column = pixel
+                sprite[row][col][0] = img_red; // 0-255
+                sprite[row][col][1] = img_green;
+                sprite[row][col][2] = img_blue;
+                sprite[row][col][3] = img_alpha; // Transparency
+            };
+        };
+
+        // Make should return sprite, frameHeight, frameWidth
+        void make() {
+            glRasterPos2i(BACKGROUND_BORDER, 0);
+            glDrawPixels(this->frameWidth,
+                        this->frameHeight, GL_RGBA,
+                        GL_UNSIGNED_BYTE, this->sprite);
+
+        };
+
+};
+
+
+class Logo {
+
+    static const int frameCount = LOGO_FRAME_COUNT;
+    static const int frameWidth = LOGO_FRAME_WIDTH;
+    static const int frameHeight = LOGO_FRAME_HEIGHT;
+
+    GLubyte sprite[frameHeight][frameWidth][4];
+
+    std::string text;
+
+    const uint32_t *data;
+
+    public:
+
+
+        Logo() {
+            
+            uint32_t red_mask = 0x000000ff;
+            int row = frameHeight;
+
+            this->data = &logo_data[0][0];
+            for (unsigned int i=0; i < this->frameWidth*this->frameHeight; i++) {
+
+                unsigned int img_red = red_mask & *(this->data + i);
+
+                // Bit shifting for 2 slots on hexadecimal
+                // per color each position on hexidecimal is 4 bits.
+                // Apply the red mask to get back decimal value
+                // to obtain 0-255 rgb format
+                unsigned int img_green = red_mask & (*(this->data + i) >> 4*2);
+                unsigned int img_blue = red_mask & (*(this->data + i) >> 4*4);
+                unsigned int img_alpha = red_mask & (*(this->data + i) >> 4*6);
+
+                int col = i % (this->frameWidth);
+
+                if (i % this->frameWidth == 0) {
+                    row -= 1;
+                }
+
+                // Row and on this column = pixel
+                sprite[row][col][0] = img_red; // 0-255
+                sprite[row][col][1] = img_green;
+                sprite[row][col][2] = img_blue;
+                sprite[row][col][3] = img_alpha; // Transparency
+                // sprite[row][col][3] = 255; // Transparency
+
+                std::cout << "logo img_alpha: " << img_alpha << std::endl;
+            };
+        };
+
+        // Make should return sprite, frameHeight, frameWidth
+        void make() {
+            glRasterPos2i(BACKGROUND_BORDER+80, 450);
+            glDrawPixels(this->frameWidth,
+                        this->frameHeight, GL_RGBA,
+                        GL_UNSIGNED_BYTE, this->sprite);
+
+        };
+
+};
+
+
+class Bandit {
+
+    static const int frameCount = BANDIT_FRAME_COUNT;
+    static const int frameWidth = BANDIT_FRAME_WIDTH;
+    static const int frameHeight = BANDIT_FRAME_HEIGHT;
+
+    GLubyte sprite[frameHeight][frameWidth][4];
+
+    const uint32_t *data;
+
+    public:
+
+        Bandit() {
+            
+            uint32_t red_mask = 0x000000ff;
+            int row = frameHeight;
+
+            this->data = &bandit_data[0][0];
+            for (unsigned int i=0; i < this->frameWidth*this->frameHeight; i++) {
+
+                unsigned int img_red = red_mask & *(this->data + i);
+
+                // Bit shifting for 2 slots on hexadecimal
+                // per color each position on hexidecimal is 4 bits.
+                // Apply the red mask to get back decimal value
+                // to obtain 0-255 rgb format
+                unsigned int img_green = red_mask & (*(this->data + i) >> 4*2);
+                unsigned int img_blue = red_mask & (*(this->data + i) >> 4*4);
+                unsigned int img_alpha = red_mask & (*(this->data + i) >> 4*6);
+
+                int col = i % (this->frameWidth);
+
+                if (i % this->frameWidth == 0) {
+                    row -= 1;
+                }
+
+                // Row and on this column = pixel
+                sprite[row][col][0] = img_red; // 0-255
+                sprite[row][col][1] = img_green;
+                sprite[row][col][2] = img_blue;
+                sprite[row][col][3] = img_alpha; // Transparency
+            };
+        };
+
+        // Make should return sprite, frameHeight, frameWidth
+        void make() {
+            glRasterPos2i(BACKGROUND_BORDER+100, 250);
+            glDrawPixels(this->frameWidth,
+                        this->frameHeight, GL_RGBA,
+                        GL_UNSIGNED_BYTE, this->sprite);
+
+        };
+
+};
+
+class Spider {
+
+    static const int frameCount = SPIDER_FRAME_COUNT;
+    static const int frameWidth = SPIDER_FRAME_WIDTH;
+    static const int frameHeight = SPIDER_FRAME_HEIGHT;
+
+    GLubyte sprite[frameHeight][frameWidth][4];
+
+    const uint32_t *data;
+
+    public:
+
+        Spider() {
+            
+            uint32_t red_mask = 0x000000ff;
+            int row = frameHeight;
+
+            this->data = &spider_data[0][0];
+            for (unsigned int i=0; i < this->frameWidth*this->frameHeight; i++) {
+
+                unsigned int img_red = red_mask & *(this->data + i);
+
+                // Bit shifting for 2 slots on hexadecimal
+                // per color each position on hexidecimal is 4 bits.
+                // Apply the red mask to get back decimal value
+                // to obtain 0-255 rgb format
+                unsigned int img_green = red_mask & (*(this->data + i) >> 4*2);
+                unsigned int img_blue = red_mask & (*(this->data + i) >> 4*4);
+                unsigned int img_alpha = red_mask & (*(this->data + i) >> 4*6);
+
+                int col = i % (this->frameWidth);
+
+                if (i % this->frameWidth == 0) {
+                    row -= 1;
+                }
+
+                // Row and on this column = pixel
+                sprite[row][col][0] = img_red; // 0-255
+                sprite[row][col][1] = img_green;
+                sprite[row][col][2] = img_blue;
+                sprite[row][col][3] = img_alpha; // Transparency
+            };
+        };
+
+        // Make should return sprite, frameHeight, frameWidth
+        void make() {
+            glRasterPos2i(BACKGROUND_BORDER+200, 250);
+            glDrawPixels(this->frameWidth,
+                        this->frameHeight, GL_RGBA,
+                        GL_UNSIGNED_BYTE, this->sprite);
+
+        };
+
+};
+
+class Skeleton {
+
+    static const int frameCount = SKELETON_FRAME_COUNT;
+    static const int frameWidth = SKELETON_FRAME_WIDTH;
+    static const int frameHeight = SKELETON_FRAME_HEIGHT;
+
+    GLubyte sprite[frameHeight][frameWidth][4];
+
+    const uint32_t *data;
+
+    public:
+
+        Skeleton() {
+            
+            uint32_t red_mask = 0x000000ff;
+            int row = frameHeight;
+
+            this->data = &skeleton_data[0][0];
+            for (unsigned int i=0; i < this->frameWidth*this->frameHeight; i++) {
+
+                unsigned int img_red = red_mask & *(this->data + i);
+
+                // Bit shifting for 2 slots on hexadecimal
+                // per color each position on hexidecimal is 4 bits.
+                // Apply the red mask to get back decimal value
+                // to obtain 0-255 rgb format
+                unsigned int img_green = red_mask & (*(this->data + i) >> 4*2);
+                unsigned int img_blue = red_mask & (*(this->data + i) >> 4*4);
+                unsigned int img_alpha = red_mask & (*(this->data + i) >> 4*6);
+
+                int col = i % (this->frameWidth);
+
+                if (i % this->frameWidth == 0) {
+                    row -= 1;
+                }
+
+                // Row and on this column = pixel
+                sprite[row][col][0] = img_red; // 0-255
+                sprite[row][col][1] = img_green;
+                sprite[row][col][2] = img_blue;
+                sprite[row][col][3] = img_alpha; // Transparency
+            };
+        };
+
+        // Make should return sprite, frameHeight, frameWidth
+        void make() {
+            glRasterPos2i(BACKGROUND_BORDER+350, 250);
+            glDrawPixels(this->frameWidth,
+                        this->frameHeight, GL_RGBA,
+                        GL_UNSIGNED_BYTE, this->sprite);
+
+        };
+
+};
+
+class Coughbie {
+
+    static const int frameCount = COUGHBIE_FRAME_COUNT;
+    static const int frameWidth = COUGHBIE_FRAME_WIDTH;
+    static const int frameHeight = COUGHBIE_FRAME_HEIGHT;
+
+    GLubyte sprite[frameHeight][frameWidth][4];
+
+    const uint32_t *data;
+
+    public:
+
+        Coughbie() {
+            
+            uint32_t red_mask = 0x000000ff;
+            int row = frameHeight;
+
+            this->data = &coughbie_data[0][0];
+            for (unsigned int i=0; i < this->frameWidth*this->frameHeight; i++) {
+
+                unsigned int img_red = red_mask & *(this->data + i);
+
+                // Bit shifting for 2 slots on hexadecimal
+                // per color each position on hexidecimal is 4 bits.
+                // Apply the red mask to get back decimal value
+                // to obtain 0-255 rgb format
+                unsigned int img_green = red_mask & (*(this->data + i) >> 4*2);
+                unsigned int img_blue = red_mask & (*(this->data + i) >> 4*4);
+                unsigned int img_alpha = red_mask & (*(this->data + i) >> 4*6);
+
+                int col = i % (this->frameWidth);
+
+                if (i % this->frameWidth == 0) {
+                    row -= 1;
+                }
+
+                // Row and on this column = pixel
+                sprite[row][col][0] = img_red; // 0-255
+                sprite[row][col][1] = img_green;
+                sprite[row][col][2] = img_blue;
+                sprite[row][col][3] = img_alpha; // Transparency
+            };
+        };
+
+        // Make should return sprite, frameHeight, frameWidth
+        void make() {
+            glRasterPos2i(BACKGROUND_BORDER+450, 250);
+            glDrawPixels(this->frameWidth,
+                        this->frameHeight, GL_RGBA,
+                        GL_UNSIGNED_BYTE, this->sprite);
+
+        };
+
+
+};
+
+class StartBackground {
+
+    static const int frameCount = START_BG_FRAME_COUNT;
+    static const int frameWidth = START_BG_FRAME_WIDTH;
+    static const int frameHeight = START_BG_FRAME_HEIGHT;
+
+    GLubyte sprite[frameHeight][frameWidth][4];
+
+    const uint32_t *data;
+
+    public:
+
+        StartBackground() {
+            
+            uint32_t red_mask = 0x000000ff;
+            int row = frameHeight;
+
+            this->data = &start_bg_data[0][0];
+            for (unsigned int i=0; i < this->frameWidth*this->frameHeight; i++) {
+
+                unsigned int img_red = red_mask & *(this->data + i);
+
+                // Bit shifting for 2 slots on hexadecimal
+                // per color each position on hexidecimal is 4 bits.
+                // Apply the red mask to get back decimal value
+                // to obtain 0-255 rgb format
+                unsigned int img_green = red_mask & (*(this->data + i) >> 4*2);
+                unsigned int img_blue = red_mask & (*(this->data + i) >> 4*4);
+                unsigned int img_alpha = red_mask & (*(this->data + i) >> 4*6);
+
+                int col = i % (this->frameWidth);
+
+                if (i % this->frameWidth == 0) {
+                    row -= 1;
+                }
+
+                // Row and on this column = pixel
+                sprite[row][col][0] = img_red; // 0-255
+                sprite[row][col][1] = img_green;
+                sprite[row][col][2] = img_blue;
+                sprite[row][col][3] = img_alpha; // Transparency
+            };
+        };
+
+        // Make should return sprite, frameHeight, frameWidth
+        void make() {
+            glRasterPos2i(BACKGROUND_BORDER, 300-120);
+            glDrawPixels(this->frameWidth,
+                        this->frameHeight, GL_RGBA,
+                        GL_UNSIGNED_BYTE, this->sprite);
+
+        };
+
+
+};
+
+
+DialogueBox boxFactory = DialogueBox();
+Logo logoFactory = Logo();
+Bandit banditFactory = Bandit();
+StartBackground startBGFactory = StartBackground();
+Spider spiderFactory = Spider();
+Skeleton skeletonFactory = Skeleton();
+Coughbie coughbieFactory = Coughbie();
+
+GLubyte sprite[TAVERN_SCENE_FRAME_HEIGHT][TAVERN_SCENE_FRAME_WIDTH][4];
+
+
+class StartScene : public Scene {
+
+    public:
+        void make() override {
+           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+           startBGFactory.make();
+           banditFactory.make();
+           spiderFactory.make();
+           skeletonFactory.make();
+           coughbieFactory.make();
+           logoFactory.make();
+           boxFactory.make();
+
+           GLfloat white[3] = { 1.0, 0.5, 1.0 };
+           glColor3fv(white);
+
+           glRasterPos2i(315, 100);
+
+           printString(test.c_str(), test.size());
+
+           glFlush();
+
+           std::string soundName = "sounds/title_1.mp3";
+
+           if (loopSong == false) {
+               sfxThread = std::thread(playSfx, soundName, &loopSong, &threadLife);
+               sfxThread.detach();
+               loopSong = false;
+           }
+
+        }
+
+};
+
+
+void generateSprite(void)
+{
+    uint32_t red_mask = 0x000000ff;
+
+    int row = TAVERN_SCENE_FRAME_HEIGHT;
+
+    for (int i=0; i < TAVERN_SCENE_FRAME_WIDTH*TAVERN_SCENE_FRAME_HEIGHT; i++) {
+        unsigned int img_red = red_mask & tavern_scene_data[0][i];
+
+        // Bit shifting for 2 slots on hexadecimal
+        // per color each position on hexidecimal is 4 bits.
+        // Apply the red mask to get back decimal value
+        // to obtain 0-255 rgb format
+        unsigned int img_green = red_mask & (tavern_scene_data[0][i] >> 4*2);
+        unsigned int img_blue = red_mask & (tavern_scene_data[0][i] >> 4*4);
+        unsigned int img_alpha = red_mask & (tavern_scene_data[0][i] >> 4*6);
+
+        int col = i % (TAVERN_SCENE_FRAME_WIDTH);
+
+
+        if (i % TAVERN_SCENE_FRAME_WIDTH == 0) {
+            row -= 1;
+        }
+
+        // Row and on this column = pixel
+        sprite[row][col][0] = img_red; // 0-255
+        sprite[row][col][1] = img_green;
+        sprite[row][col][2] = img_blue;
+        sprite[row][col][3] = img_alpha; // Transparency
+    };
+}
+
+
+
+
+void init(void)
+{
+   glClearColor (0.0, 0.0, 0.0, 0.0);
+   glShadeModel(GL_FLAT);
+   generateSprite();
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+   glShadeModel (GL_FLAT);
+   makeRasterFont();
 }
 
 
@@ -121,38 +599,96 @@ void printString(const char *s, int length)
  */
 void display(void)
 {
-   GLfloat white[3] = { 1.0, 1.0, 1.0 };
+           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+           startBGFactory.make();
+           banditFactory.make();
+           spiderFactory.make();
+           skeletonFactory.make();
+           coughbieFactory.make();
+           logoFactory.make();
+           boxFactory.make();
 
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   glColor3fv(white);
+           GLfloat white[3] = { 1.0, 0.5, 1.0 };
+           glColor3fv(white);
 
-   glRasterPos2i(130, 150);
+           glRasterPos2i(315, 100);
 
-   std::cout << "test: " << test << std::endl;
-   printString(test.c_str(), test.size());
+           printString(test.c_str(), test.size());
 
-   // glRasterPos2i(20, 40);
-   // printString(test2.c_str(), test.size());
-   glFlush();
+           glFlush();
+
+           std::string soundName = "sounds/title_1.mp3";
+
+           if (loopSong == false) {
+               sfxThread = std::thread(playSfx, soundName, &loopSong, &threadLife);
+               sfxThread.detach();
+               loopSong = false;
+           }
+
+
 }
 
 void display2(void)
 {
-   GLfloat white[3] = { 1.0, 1.0, 1.0 };
+    threadLife = false;
 
+   // Set scene here
+   /*
+   glClear(GL_COLOR_BUFFER_BIT);
+   glRasterPos2i(0, 300-100);
+   glDrawPixels(TAVERN_SCENE_FRAME_WIDTH,
+                TAVERN_SCENE_FRAME_HEIGHT, GL_RGBA,
+                GL_UNSIGNED_BYTE, sprite);
+   glFlush();
+   */
+
+   loopSong = false;
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+   // glClear(GL_COLOR_BUFFER_BIT);
+   glRasterPos2i(BACKGROUND_BORDER, 300-120);
+   glDrawPixels(TAVERN_SCENE_FRAME_WIDTH,
+                TAVERN_SCENE_FRAME_HEIGHT, GL_RGBA,
+                GL_UNSIGNED_BYTE, sprite);
+
+   boxFactory.make();
+
+   GLfloat white[3] = { 1.0, 1.0, 1.0 };
    glColor3fv(white);
 
-   glRasterPos2i(20, 280 - 100);
 
-   std::cout << "test2: " << test2 << std::endl;
+   glRasterPos2i(TEXT_BOX_BORDER, 140);
    printString(test.c_str(), test.size());
 
-   glRasterPos2i(20, 240 - 100);
-   printString(test2.c_str(), test.size());
+   if (USR_CHOICE == 0) {
+       GLfloat purp[3] = { 1.0, 0.5, 1.0 };
+       glColor3fv(purp);
 
-   glRasterPos2i(20, 220 - 100);
-   printString(test3.c_str(), test.size());
+       glRasterPos2i(TEXT_BOX_BORDER, 100);
+       printString(test2.c_str(), test.size());
+
+       GLfloat white[3] = { 1.0, 1.0, 1.0 };
+       glColor3fv(white);
+
+       glRasterPos2i(TEXT_BOX_BORDER, 60);
+       printString(test3.c_str(), test.size());
+   }
+
+   else if (USR_CHOICE == 1) {
+
+       GLfloat white[3] = { 1.0, 1.0, 1.0 };
+       glColor3fv(white);
+
+       glRasterPos2i(TEXT_BOX_BORDER, 100);
+       printString(test2.c_str(), test.size());
+
+
+       GLfloat purp[3] = { 1.0, 0.5, 1.0 };
+       glColor3fv(purp);
+
+       glRasterPos2i(TEXT_BOX_BORDER, 60);
+       printString(test3.c_str(), test.size());
+   }
 
    glFlush();
 
@@ -169,11 +705,19 @@ void reshape(int w, int h)
 
 void renderFn() {
 
-    if (STEP % 150000 == 0) {
-        if (current_scene == "start") {
-            test = "START";
-            test2 = "";
+    // Scene displayedScene;
 
+    if (STEP % 200000 == 0) {
+        if (current_scene == "start") {
+
+            if (test == "") {
+                test = "PRESS A TO START";
+                test2 = "";
+            } else {
+                test = "";
+            };
+
+            // displayedScene = StartScene();
             display();
         };
 
@@ -182,7 +726,7 @@ void renderFn() {
             // Description of scene
             test =  "YOU ARE IN AN EMPTY ROOM.";
 
-	    // Options
+            // Options
             test2 = " LOOK AROUND AND PONDER.";
             test3 = " YOU GIVE UP";
 
@@ -197,8 +741,11 @@ void renderFn() {
         };
     }
 
+
+    // displayedScene.make();
     STEP += 1;
 };
+
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -209,18 +756,6 @@ void keyboard(unsigned char key, int x, int y)
        std::cout << "switching scene" << std::endl;
        current_scene = "yes";
    }
-
-   /*
-   switch (key) {
-      case 'a':
-          current_scene = "yes";
-      case 27:
-          // current_scene = "yes";
-         std::cout << "key: " << key << std::endl;
-         std::cout <<"exiting" << std::endl;
-         exit(0);
-   }
-   */
 
 }
 
@@ -234,8 +769,6 @@ void specialKeyboard(int key, int x, int y) {
         else if (USR_CHOICE == 1) {
             USR_CHOICE = 0;
         };
-
-        std::cout << "pressing up key: " << std::endl;
     }
 
     else if (key == GLUT_KEY_DOWN) {
@@ -247,8 +780,6 @@ void specialKeyboard(int key, int x, int y) {
         else if (USR_CHOICE == 0) {
             USR_CHOICE = 1;
         };
-
-        std::cout << "pressing down key: " << std::endl;
     }
 };
 
@@ -259,11 +790,16 @@ void specialKeyboard(int key, int x, int y) {
  */
 int main(int argc, char** argv)
 {
+
    glutInit(&argc, argv);
-   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
    glutInitWindowSize(800, 600);
    glutInitWindowPosition(100, 100);
    glutCreateWindow(argv[0]);
+
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   glEnable(GL_BLEND);
+
    init();
    glutReshapeFunc(reshape);
    glutKeyboardFunc(keyboard);
@@ -271,8 +807,8 @@ int main(int argc, char** argv)
 
    glutDisplayFunc(renderFn);
 
-   int time = 0;
-   
+   glutSetWindowTitle("Covid Fantasy XIX: Evolution");
+
    glutIdleFunc(renderFn);
 
    glutMainLoop();
