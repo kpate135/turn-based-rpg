@@ -1,6 +1,7 @@
 #include "Entity.hpp"
 #include "Character.hpp"
 #include "Action.hpp"
+#include "Factory.hpp"
 
 #include "gtest/gtest.h"
 

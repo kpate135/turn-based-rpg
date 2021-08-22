@@ -27,7 +27,7 @@ class Entity {
 	public:
 		Action* action1 = 0;
 		Entity() {} //shouldn't be intialized this way
-		Entity(std::string nm, std::string typ, Action* act1, int HP, int ATK, int spd) : name(nm), type(typ), action1(act1), baseHP(HP), baseATK(ATK), baseSPD(spd) {} //this will be mainly for testing purposes
+		Entity(std::string nm, std::string typ, Action* act1, int HP, int ATK, int spd) : name(nm), type(typ), action1(act1), baseHP(HP), baseATK(ATK), baseSPD(spd) {currHP = HP; currATK = ATK; currSPD = spd;} //this will be mainly for testing purposes
 		~Entity() { delete action1; }
 
 		std::string GetName() { return this->name; } // Will return the entities name
