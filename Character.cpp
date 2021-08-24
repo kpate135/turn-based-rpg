@@ -33,7 +33,7 @@ void Character::UpdateStats() {
 
 void Character::RestoreStats() {
 	this->currATK = this->maxATK;
-	//this->currHP = this->maxHP;
+	this->currHP = this->maxHP;
 	this->currSPD = this->maxSPD;
 }
 

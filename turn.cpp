@@ -36,6 +36,39 @@ void OrderQueue() {
     }
 }
 
+
+void OrderQueue_() {
+    Entity** full = new Entity*[playerTeam_size + enemyTeam_size];
+    for (int i = 0; i < playerTeam_size; i++) {
+        full[i] = playerTeam[i];
+    }
+    for (int i = playerTeam_size; i < enemyTeam_size + playerTeam_size; i++) {
+        full[i] = enemyTeam[i - playerTeam_size];
+    }
+
+    for (int i = 0; i < enemyTeam_size + playerTeam_size; ++i) {
+        for (int j = 0; j < enemyTeam_size + playerTeam_size - 1; ++j) {
+            if (full[j]->GetSPD() < full[j + 1]->GetSPD()) {
+                Entity* temp = full[j];
+                full[j] = full[j + 1];
+                full[j + 1] = temp;
+                temp = nullptr;
+            }
+        }
+    }
+
+    for (int i = 0; i < enemyTeam_size + playerTeam_size; i++) {
+        if (!full[i]->IsDead()) turnQueue.push(full[i]);
+    }
+
+    for (int i = 0; i < enemyTeam_size + playerTeam_size; i++) {
+        full[i] = nullptr;
+    }
+}
+
+
+
+
 bool playerDefeated() {
     if (playerTeam_size < 1) return true;
 
@@ -219,7 +252,7 @@ void turn_SM() {
         case SM_NotInBattle:
             break;
         case SM_QueueTurn:
-            OrderQueue();
+            OrderQueue_();
             break;
         case SM_TakeTurn:
             turnTaken = TakeTurn();
@@ -267,6 +300,7 @@ int main() {
         cout << playerTeam[i]->powerGem->GetName() + " +" << playerTeam[i]->powerGem->GetTier() << endl;
         cout << playerTeam[i]->armor->GetName() + " +" << playerTeam[i]->armor->GetTier() << endl;
     }
+
 
 
     enemyTeam_size = 4;
