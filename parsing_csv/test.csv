@@ -1,0 +1,3 @@
+scene_no, dialogue, choices, type_scene,
+0, "You are in a room", ["Do nothing", "Go to next room"], "forest"
+1, "You are in a dark room", ["Do nothing", "Go to next room"], "dungeon"
