@@ -32,6 +32,19 @@ class SceneDataBase {
                 char comma_space = ',';
                 tempVector.clear();
                 while (getline(ss, word, comma_space)) {
+                    int counter = 0;
+                    if (word.find(" ") != std::string::npos && counter == 0) {
+                        word = word.substr(word.find(" ") + 1, word.length() - word.find(" "));
+                        ++counter;
+                    }                    
+                    while ((word.find("[") != std::string::npos) || (word.find("]") != std::string::npos)) {
+                        if (word.find("[") != std::string::npos) {
+                            word.erase(word.find("["), 1);
+                        }
+                        else {
+                            word.erase(word.find("]"), 1);
+                        }
+                    }
                     tempVector.push_back(word);
                 }    
                 this->db.push_back(tempVector);              
@@ -39,11 +52,28 @@ class SceneDataBase {
 
             fin.close();
         }
-        /*
-        void getSceneNo(int sceneNo) { //figure out the function of this method
-            this->db.at(sceneNo);
+
+        std::vector<std::string> getSceneNoData(int sceneNo) { //returns the row (vector<string>) at the specified sceneNo
+            return this->db.at(sceneNo + 1);
         }
-        */
+
+        //columns: scene_no - 0, dialogue - 1, choices - 2 & 3, choices_result - 4 & 5, type_scene 6 
+
+        std::string getSceneDialogue(int sceneNo) {
+            return this->db.at(sceneNo + 1).at(1);
+        }
+
+        std::string getSceneChoices(int sceneNo) {
+            return this->db.at(sceneNo + 1).at(2) + " " + this->db.at(sceneNo + 1).at(3);
+        }
+
+        std::string getSceneChoices_Result(int sceneNo) {
+            return this->db.at(sceneNo + 1).at(4) + " " + this->db.at(sceneNo + 1).at(5);
+        }
+
+        std::string getSceneType_Scene(int sceneNo) {
+            return this->db.at(sceneNo + 1).at(6);
+        }
 };
 
 #endif
