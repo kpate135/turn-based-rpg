@@ -35,7 +35,6 @@ class Action {
 
 
 
-
 class BasicAttack : public Action {
 	public:
 		BasicAttack() {
@@ -50,6 +49,7 @@ class BasicAttack : public Action {
 			return damage;
 		}
 };
+
 
 class ArcaneAttack : public Action {
 	public:

@@ -10,12 +10,12 @@
 #ifndef __TURN_H__
 #define __TURN_H__
 
-
 using namespace std;
 
 string currentScene = "";
 bool waitInput;
 int USR_CHOICE = 0;
+bool isPlayer = true;
 
 bool renderAttack = false;
 
@@ -31,9 +31,40 @@ Entity** playerTeam = new Entity *[MAX_TEAM_CAPACITY];
 Entity** enemyTeam = new Entity *[MAX_TEAM_CAPACITY];
 Entity* currEntity = nullptr;
 Entity* targetEntity = nullptr;
+int target;
 
 int globalDamage = 0;
 int battleChoice = 4;
+
+
+void OrderQueue_() {
+    Entity** full = new Entity*[playerTeam_size + enemyTeam_size];
+    for (int i = 0; i < playerTeam_size; i++) {
+        full[i] = playerTeam[i];
+    }
+    for (int i = playerTeam_size; i < enemyTeam_size + playerTeam_size; i++) {
+        full[i] = enemyTeam[i - playerTeam_size];
+    }
+
+    for (int i = 0; i < enemyTeam_size + playerTeam_size; ++i) {
+        for (int j = 0; j < enemyTeam_size + playerTeam_size - 1; ++j) {
+            if (full[j]->GetSPD() < full[j + 1]->GetSPD()) {
+                Entity* temp = full[j];
+                full[j] = full[j + 1];
+                full[j + 1] = temp;
+                temp = nullptr;
+            }
+        }
+    }
+
+    for (int i = 0; i < enemyTeam_size + playerTeam_size; i++) {
+        if (!full[i]->IsDead()) turnQueue.push(full[i]);
+    }
+
+    for (int i = 0; i < enemyTeam_size + playerTeam_size; i++) {
+        full[i] = nullptr;
+    }
+}
 
 void OrderQueue() {
     for (int i = 0; i < playerTeam_size; i++) {
@@ -82,11 +113,6 @@ void CheckEnemyHP() {
 
 bool PlayerTurn() {
     
-    // while(waitInput == true) {
-    // };
-
-    // cout << currEntity->GetName() << endl << "MAKE A BATTLE CHOICE\n";
-    // cin >> battleChoice;
     confirm = true; // testing purpsoes
     battleChoice = USR_CHOICE+1;
 
@@ -139,7 +165,7 @@ bool PlayerTurn() {
 
 void EnemyTurn() {
 
-    int target = rand() % playerTeam_size;
+    target = rand() % playerTeam_size;
     bool someoneIsAlive = false;
 
     for (int i = 0; i < playerTeam_size; i++) {
@@ -148,7 +174,6 @@ void EnemyTurn() {
     if (!someoneIsAlive) return;
 
     while (playerTeam[target]->IsDead()) target = rand() % playerTeam_size;
-
     if (currEntity->action1->GetTargettingInfo() == "singleAttack") {
         if ((target <= playerTeam_size) && confirm) {
             cout << currEntity->GetName() + " " + currEntity->action1->BeingUsed() + " " + playerTeam[target]->GetName() << endl;
@@ -171,7 +196,9 @@ void EnemyTurn() {
 }
 
 bool TakeTurn() {
-    bool isPlayer = false;
+
+    std::cout << "currEntity: " << currEntity->GetName() << std::endl;
+
     for (int i = 0; i < playerTeam_size; i++) {
         if (currEntity == playerTeam[i]) isPlayer = true;
     }
@@ -191,8 +218,14 @@ enum states_Battle { SM_NotInBattle, SM_QueueTurn, SM_TakeTurn, SM_CheckBattleSt
 
 void turn_SM() {
     
+    // The statemachine is 1 step behind
     std::cout << "=== currState: " << currState << "===" << std::endl;
     std::cout << "=== inBattle: " << inBattle << "===" << std::endl;
+
+    if (currEntity != nullptr) {
+        std::cout << "== SMcurrEntity==: " << currEntity->GetName() << std::endl;
+    };
+
     switch (currState) {
 
         case SM_NotInBattle:
@@ -210,6 +243,8 @@ void turn_SM() {
             if (!turnQueue.empty()) {
                 std::cout << "QueueTurn" << std::endl;
                 currEntity = turnQueue.front();
+
+                // ? Detect if monster or player?
                 turnQueue.pop();
                 turnTaken = false;
                 currState = SM_TakeTurn;
@@ -234,6 +269,7 @@ void turn_SM() {
 
             else {
 
+                    std::cout << "CheckBattleStatus" << std::endl;
                 if (!turnQueue.empty()) {
                     currEntity = turnQueue.front();
                     turnQueue.pop();
@@ -258,7 +294,7 @@ void turn_SM() {
             break;
 
         case SM_QueueTurn:
-            OrderQueue();
+            OrderQueue_();
             break;
 
         case SM_TakeTurn:
@@ -273,13 +309,132 @@ void turn_SM() {
         case SM_BattleFinished:
             cout << "Battle Finished" << endl;
             while (!turnQueue.empty()) turnQueue.pop();
+            std::cout << "done popping " << std::endl;
             currEntity = nullptr;
             inBattle = false;
+            std::cout << "settting currentScene" << std::endl;
             if (playerDefeated()) currentScene = "GameOver";
             else currentScene = "Victory";
             break;
-
     }
+
+    std::cout << "turned the SM" << std::endl;
+
+}
+
+bool gettingLoot = false; // new for loot
+bool stop = false;
+int getGem = 3;
+int getArmor = 3;
+PowerGem* currLootGem = nullptr;
+Armor* currLootArmor = nullptr;
+
+enum States_Loot { SM_NotLooting, SM_Looting, SM_Yes, SM_No } currState_loot;
+void loot_SM(PowerGemFactory pf, ArmorFactory af) {
+
+
+    // Traversals
+    switch (currState_loot) {
+        case SM_NotLooting:
+            if (gettingLoot) {
+                currState_loot = SM_Looting;
+                getGem = 3;
+                getArmor = 3;
+            }
+            break;
+
+        case SM_Looting:
+            if (!gettingLoot) {
+                currState_loot = SM_NotLooting;
+                break;
+            }
+            confirm = false; //testing
+            if (!confirm) stop = false;
+            if (stop) return;
+
+            cout << "Equip(0) or discard(1)?" << endl; cin >> USR_CHOICE; cout << endl; confirm = true; // testing
+            if ((USR_CHOICE == 0) && confirm) {
+                stop = true;
+                currState_loot = SM_Yes;
+
+            }
+            else if ((USR_CHOICE == 1) && confirm) {
+                currState_loot = SM_No;
+
+            }
+            break;
+
+        case SM_Yes:
+            if (!currLootGem && !currLootArmor) {
+                currState_loot = SM_Looting;
+            }
+            break;
+
+        case SM_No:
+            if (!currLootGem && !currLootArmor) {
+                stop = true;
+                currState_loot = SM_Looting;
+            }
+            break;
+    }
+
+
+
+    // Actions
+    switch (currState_loot) {
+        case SM_NotLooting:
+            break;
+
+        case SM_Looting:
+            if (getGem > 0) {
+                if (currLootGem == nullptr) {
+                    currLootGem = pf.MakeByArea(currentScene);
+                    getGem--;
+                }
+            }
+            else if ((getArmor > 0) && !currLootGem) {
+                if (currLootArmor == nullptr) {
+                    currLootArmor = af.MakeByArea(currentScene);
+                    getArmor--;
+                }
+            }
+            else if ((getGem <= 0) && (getArmor <= 0) && !currLootGem && !currLootArmor) {
+                gettingLoot = false;
+            }
+            break;
+
+        case SM_Yes:
+            confirm = false; // testing
+            if (!confirm) stop = false;
+            if (stop) return;
+
+            cout << "Equip to whom(0-3)?" << endl; cin >> USR_CHOICE; cout << endl; confirm = true; // testing
+
+            if (currLootGem && (USR_CHOICE < playerTeam_size) && (confirm)) {
+                playerTeam[USR_CHOICE]->EquipPowerGem(currLootGem);
+                currLootGem = nullptr;
+            }
+            else if (currLootArmor && (USR_CHOICE < playerTeam_size) && (confirm)) {
+                playerTeam[USR_CHOICE]->EquipArmor(currLootArmor);
+                currLootArmor = nullptr;
+            }
+
+            break;
+
+        case SM_No:
+
+            if (currLootGem) {
+                delete currLootGem;
+                currLootGem = nullptr;
+            }
+            else if (currLootArmor) {
+                delete currLootArmor;
+                currLootArmor = nullptr;
+            }
+
+            break;
+    }
+
 }
 
 #endif

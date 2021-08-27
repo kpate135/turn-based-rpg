@@ -47,9 +47,7 @@ class EntityFactory : public AbstractFactory {
 			case 4:
 				return new Entity("BAT", "flying", new BasicAttack(), 2, 2, 10);
 				break;
-		
-
-			
+			// Catacomb
 			case 5:
 				return new Entity("COUGHBIE", "undead", new CovidAttack(), 10, 3, 1);
 				break;
@@ -63,8 +61,8 @@ class EntityFactory : public AbstractFactory {
 				return new Entity("SKELETON", "undead", new BasicAttack(), 4, 2, 10);
 				break;
 
-
-			
+			// End Catacomb
+			// COVID tower
 			case 9:
 				return new Entity("RAT", "rodent", new BasicAttack(), 7, 6, 5);
 				break;
@@ -110,7 +108,7 @@ class CharacterFactory : public AbstractFactory {
 			return new Character("PYRA", "PYROMANCER", new FireAttack(), 6, 6, 2, new PowerGem(), new Armor());
 			break;
 		case 5:
-			return new Character("Will", "RASCAL", new CovidAttack(), 7, 4, 2, new PowerGem(), new Armor());
+			return new Character("WILL", "RASCAL", new CovidAttack(), 7, 4, 2, new PowerGem(), new Armor());
 			break;
 		case 6:
 			return new Character("RAWR", "KAREN", new BerzerkAttack(), 8, 6, 1, new PowerGem(), new Armor());
