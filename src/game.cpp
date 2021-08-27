@@ -535,9 +535,8 @@ void battleSceneChoices() {
         };
     } else if (menu.compare("choose_attack") == 0) {
 
+	// TODO: Check for battle finished here
         isPlayer = entityIsCharacter(turnQueue.front());
-
-        // ?? Check
         if (isPlayer == true) {
 
             textTwoFactory->setText(enemyTeam[0]->GetName());
