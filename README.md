@@ -43,5 +43,5 @@ the top right.
  ## Installation/Usage
  > Instructions on installing and running your application
  ## Testing
- > How was your project tested/validated? If you used CI, you should have a "build passing" badge in this README.
+ For the Character code, we tested with google unit testing to make sure that everything worked as needed. For the state machine that run the battles and the loot system we simply started by randomly entering input to find various bugs (while keeping track of the input chain) to track down common bugs and fixing them. We then moved to methodical patterns that aimed at edge cases to find and fix bugs. Lastly, we used simple play tested to find bugs throughout the rest of the state machines.
  
