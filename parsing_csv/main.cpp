@@ -53,7 +53,7 @@ int main() {
     cout << endl;
 
     cout << "Calling getSceneChoices_Result on scene 0" << endl;
-    vector<string> sceneChoices_Result = testscene_database.getSceneChoices_Result(0);
+    vector<int> sceneChoices_Result = testscene_database.getSceneChoices_Result(0);
     cout << "Scene 0 Choice_Result: ";
     for (int i = 0; i < sceneChoices_Result.size(); ++i) {
         cout << sceneChoices_Result.at(i) << ", ";

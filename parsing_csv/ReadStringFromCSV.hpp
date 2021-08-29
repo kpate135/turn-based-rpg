@@ -70,10 +70,14 @@ class SceneDataBase {
             return tempVector;
         }
 
-        std::vector<std::string> getSceneChoices_Result(int sceneNo) {
-	    std::vector<std::string> tempVector;
-	    tempVector.push_back(db.at(sceneNo + 1).at(4));
-	    tempVector.push_back(db.at(scenNo + 1).at(5));            
+        std::vector<int> getSceneChoices_Result(int sceneNo) {
+	    std::vector<int> tempVector;
+	    std::string temp1 = db.at(sceneNo + 1).at(4);
+	    std::string temp2 = db.at(sceneNo + 1).at(5);
+            int result1 = std::stoi(temp1);
+	    int result2 = std::stoi(temp1);
+	    tempVector.push_back(result1);
+	    tempVector.push_back(result2);            
 	    return tempVector;
         }
 
