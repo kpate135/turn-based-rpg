@@ -63,12 +63,18 @@ class SceneDataBase {
             return this->db.at(sceneNo + 1).at(1);
         }
 
-        std::string getSceneChoices(int sceneNo) {
-            return this->db.at(sceneNo + 1).at(2) + " " + this->db.at(sceneNo + 1).at(3);
+        std::vector<std::string> getSceneChoices(int sceneNo) {
+	    std::vector<std::string> tempVector; 
+	    tempVector.push_back(db.at(sceneNo + 1).at(2));
+	    tempVector.push_back(db.at(sceneNo + 1).at(3));
+            return tempVector;
         }
 
-        std::string getSceneChoices_Result(int sceneNo) {
-            return this->db.at(sceneNo + 1).at(4) + " " + this->db.at(sceneNo + 1).at(5);
+        std::vector<std::string> getSceneChoices_Result(int sceneNo) {
+	    std::vector<std::string> tempVector;
+	    tempVector.push_back(db.at(sceneNo + 1).at(4));
+	    tempVector.push_back(db.at(scenNo + 1).at(5));            
+	    return tempVector;
         }
 
         std::string getSceneType_Scene(int sceneNo) {

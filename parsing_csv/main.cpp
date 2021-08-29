@@ -44,17 +44,25 @@ int main() {
     cout << endl;
 
     cout << "Calling getSceneChoices on scene 1" << endl;
-    cout << "Scene 1 Choices: " << testscene_database.getSceneChoices(1) << endl;
+    vector<string> sceneChoices = testscene_database.getSceneChoices(1);
+    cout << "Scene 1 Choices: "; 
+    for (int i = 0; i < sceneChoices.size(); ++i) {
+        cout << sceneChoices.at(i) << ", ";
+    }
+    cout << endl;
     cout << endl;
 
     cout << "Calling getSceneChoices_Result on scene 0" << endl;
-    cout << "Scene 0 Choice_Result: " << testscene_database.getSceneChoices_Result(0) << endl;
+    vector<string> sceneChoices_Result = testscene_database.getSceneChoices_Result(0);
+    cout << "Scene 0 Choice_Result: ";
+    for (int i = 0; i < sceneChoices_Result.size(); ++i) {
+        cout << sceneChoices_Result.at(i) << ", ";
+    }
+    cout << endl;
     cout << endl;
 
     cout << "Calling getSceneType_Scene on scene 1" << endl;
     cout << "Scene 1 Type_Scene: " << testscene_database.getSceneType_Scene(1) << endl;
     cout << endl;
-    
-
 
 }   
