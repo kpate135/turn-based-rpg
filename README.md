@@ -32,11 +32,32 @@ Each factory creates a Background, Character Sprite, and On-Screen text objects.
 the top right.
 
 
- > ## Final deliverable
- > All group members will give a demo to the TA during lab time. The TA will check the demo and the project GitHub repository and ask a few questions to all the team members. 
- > Before the demo, you should do the following:
- > * Complete the sections below (i.e. Screenshots, Installation/Usage, Testing)
- > * Plan one more sprint (that you will not necessarily complete before the end of the quarter). Your In-progress and In-testing columns should be empty (you are not doing more work currently) but your TODO column should have a full sprint plan in it as you have done before. This should include any known bugs (there should be some) or new features you would like to add. These should appear as issues/cards on your Kanban board. 
+# Installation
+
+## Dependencies
+
+OS Requirement:
+	- Debian based
+
+Library requirements:
+	- libao-dev
+	- libmpg123-dev
+
+To install the libraries on debian based operating systems you can run:
+```bash
+sudo apt install libao-dev && sudo apt install libmpg123-dev
+```
+
+## Compiling
+To compile run `./compile.sh` which is a shell script that runs with the proper flags.
+
+# Running
+To run the game, run the command `./a.out`.
+
+# Demo
+
+![gifdemo](game.gif)
+
  
  ## Screenshots
  > Screenshots of the input/output after running your application
