@@ -15,8 +15,6 @@ class Character : public Entity {
 		void UpdateStats(); // Called after equipment changes to alter totalStat attributes
 
 	public:
-		PowerGem* powerGem = nullptr;
-		Armor* armor = nullptr;
 		Character();
 		Character(std::string nm, std::string typ, Action* act1, int hp, int atk, int spd, PowerGem* pwrGem, Armor* armr);
 		~Character() { delete action1; delete powerGem; delete armor; }

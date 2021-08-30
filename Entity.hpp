@@ -1,6 +1,7 @@
 #ifndef __ENTITY_HPP__
 #define __ENTITY_HPP__
 
+#include "Equipment.hpp"
 #include <string>
 
 class Action;
@@ -26,6 +27,8 @@ class Entity {
 
 	public:
 		Action* action1 = 0;
+		PowerGem* powerGem = new PowerGem();
+		Armor* armor = new Armor();
 		Entity() {} //shouldn't be intialized this way
 		Entity(std::string nm, std::string typ, Action* act1, int HP, int ATK, int spd) : name(nm), type(typ), action1(act1), baseHP(HP), baseATK(ATK), baseSPD(spd) {currHP = HP; currATK = ATK; currSPD = spd;} //this will be mainly for testing purposes
 		~Entity() { delete action1; }
@@ -37,6 +40,12 @@ class Entity {
 		int GetATK() { return this->currATK; } // Will return currATK
 		int GetSPD() { return this->currSPD; } // Will return currSPD
 		bool IsDead() { return this->dead; } // returns dead boolean
+
+
+		virtual void RestoreStats() {} // Used after battle to recover from ailments and stat debuffs
+		virtual void EquipPowerGem(PowerGem* pwrGem) {} // Used to equip a new PowerGem, discards old one
+		virtual void EquipArmor(Armor* armr) {} // Used to equip new Armor, discards old one	
+
 
 		void TakeDamage(int dmg);
 		void Heal(int healAmount);

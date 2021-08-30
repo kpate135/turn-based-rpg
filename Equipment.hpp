@@ -11,7 +11,7 @@ class PowerGem {
 		int tier = 0;
 
 	public:
-		PowerGem() : name("bare hands"), ATK(0), SPD(5) {}
+		PowerGem() : name("bare hands"), ATK(0), SPD(0) {}
 		PowerGem(std::string nm, int atk, int spd, int tr) : name(nm), ATK(atk), SPD(spd), tier(tr) {}
 		std::string GetName() { return this->name; }
 		int GetATK() {
@@ -19,6 +19,7 @@ class PowerGem {
 			return this->ATK;
 		}
 		int GetSPD() { return this->SPD; }
+		int GetTier() { return this->tier; }
 };
 
 class Armor {
@@ -29,7 +30,7 @@ class Armor {
 		int tier = 0;
 
 	public:
-		Armor() : name("naked o.O"), HP(0), SPD(10) {}
+		Armor() : name("naked o.O"), HP(0), SPD(0) {}
 		Armor(std::string nm, int hp, int spd, int tr) : name(nm), HP(hp), SPD(spd), tier(tr) {}
 		std::string GetName() { return this->name; }
 		int GetHP()  {
@@ -37,6 +38,7 @@ class Armor {
                         return this->HP;
                 }
 		int GetSPD() { return this->SPD; }
+		int GetTier() { return this->tier; }
 };
 
 #endif
