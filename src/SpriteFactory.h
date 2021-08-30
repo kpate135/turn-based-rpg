@@ -11,6 +11,8 @@ class SpriteFactory {
 
         Sprite *makeByName(std::string name) {
 
+            // std::cout < "==name==: " << name << std::endl;
+
             if (name == "BANDIT") {
                 return new Bandit();
             }
@@ -35,6 +37,13 @@ class SpriteFactory {
 	    else if (name == "HAUNTED COFFIN") {
 		    return new HauntedCoffin();
 	    }
+        else if (name == "HAUNTED ARMOR") {
+            return new HauntedArmor();
+        } else if (name == "COVID ILL MAN") {
+            return new CovidIllMan();
+        } else if (name == "HAUNTED HAMMER") {
+            return new HauntedHammer();
+        }
 	    else if (name == "GRAVE ROBBER") {
 		    return new GraveRobber();
 	    }
@@ -50,6 +59,11 @@ class SpriteFactory {
 	    else if (name == "CATACOMBS_BG") {
 		    return new CatacombsBackground();
 	    }
+        else if (name == "TOWER_BG") {
+            return new TowerBackground();
+        } else if (name == "FOREST_BG") {
+            return new ForestBackground();
+        }
             else if (name == "DIALOGUE_BOX") {
                 return new DialogueBox();
             }
@@ -63,7 +77,7 @@ class SpriteFactory {
                 return new GameOverText();
             }
             else {
-                throw std::invalid_argument("Received invalid sprite name.");
+                throw std::invalid_argument("Received invalid sprite name: " + name);
             }
         }
 };

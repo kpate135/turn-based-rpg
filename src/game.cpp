@@ -230,6 +230,8 @@ Sprite *startBGFactory = spriteFactory.makeByName("START_BG");
 Sprite *tavernBGFactory = spriteFactory.makeByName("TAVERN_BG");
 Sprite *battleBGFactory = spriteFactory.makeByName("BATTLE_BG");
 Sprite *catacombsBGFactory = spriteFactory.makeByName("CATACOMBS_BG");
+Sprite *forestBGFactory = spriteFactory.makeByName("FOREST_BG");
+Sprite *towerBGFactory = spriteFactory.makeByName("TOWER_BG");
 
 // Forest
 Sprite *banditFactory = spriteFactory.makeByName("BANDIT");
@@ -301,6 +303,7 @@ class StartScene : public Scene {
 
       StartScene() : Scene() {
 
+          threadLife = false;
           textOneFactory->setText(dialogue);
           // textTwoFactory->setText(dialogue);
 
@@ -332,6 +335,8 @@ class StartScene : public Scene {
 
           this->sprites.push_back(logoFactory);
           this->sprites.push_back(boxFactory);
+
+          textOneFactory->setText(dialogue);
           this->sprites.push_back(textOneFactory);
 
       }
@@ -378,11 +383,27 @@ class BattleScene : public Scene {
 
             threadLife = false;
 
-            name = "battle_scene";
+            name = current_scene;
             // music = "sounds/start_music.mp3";
+
+            enemyTeam_size = 0;
              music = "sounds/battle_theme_catacomb.mp3";
 
-            std::string area = "Catacombs";
+             string area;
+             Sprite *bgSprite;
+
+             if (current_scene == "catacombs_scene") {
+                area = "Catacombs";
+                bgSprite = catacombsBGFactory;
+             } else if (current_scene == "tower_scene") {
+                 area = "Covid Tower";
+                 bgSprite = towerBGFactory;
+             } else if (current_scene == "forest_scene") {
+                 area = "Forest";
+                 bgSprite = forestBGFactory;
+             }
+
+            std::cout << "== area == : " << area << std::endl;
             Entity* monsterOne = entityFactory.MakeByArea(area);
             Entity* monsterTwo = entityFactory.MakeByArea(area);
             Entity* monsterThree = entityFactory.MakeByArea(area);
@@ -410,7 +431,9 @@ class BattleScene : public Scene {
             Sprite *monsterThreeFac = spriteFactory.makeByName(monsterThree->GetName());
             Sprite *monsterFourFac = spriteFactory.makeByName(monsterFour->GetName());
 
-            this->sprites.push_back(catacombsBGFactory);
+
+            this->sprites.push_back(bgSprite);
+
             monsterOneFac->setXPos(BACKGROUND_BORDER+50);
             monsterOneFac->setYPos(250);
             this->sprites.push_back(monsterOneFac);
@@ -431,9 +454,12 @@ class BattleScene : public Scene {
 
             std::string namesTogether;
 
+            std::cout << "putitng names together" << std::endl;
+            std::cout << "enemyTeam_size: " << enemyTeam_size << std::endl;
             for (unsigned int i=0; i < enemyTeam_size; i++) {
                 namesTogether = namesTogether + " " + enemyTeam[i]->GetName();
             };
+            std::cout << "crashed putting " << std::endl;
 
             textOneFactory->setText("OH NO YOU ENCOUNTERED " + namesTogether);
             this->sprites.push_back(textOneFactory);
@@ -551,7 +577,8 @@ class VictoryScene : public Scene {
 
         victoryText->setXPos(victoryText->getXPos() + 200);
 
-        textOneFactory->setText("TADA YOU DEFEATED THEM");
+        textOneFactory->setText(dialogue);
+        // textOneFactory->setText("TADA YOU DEFEATED THEM");
         this->sprites.push_back(victoryText);
         this->sprites.push_back(dialogueBox);
         this->sprites.push_back(textOneFactory);
@@ -636,14 +663,15 @@ void tavernSceneChoices() {
     // test2 = " LOOK AROUND AND PONDER.";
     // test3 = " YOU GIVE UP";
 
+    // std::cout << "USR_CHOICE: " << USR_CHOICE << std::endl;
     if (USR_CHOICE == 0){
-        test2 = "O" + test2;
+        // test2 = "O" + test2;
         textTwoFactory->setGreen(0.5);
         textThreeFactory->setGreen(1.0);
     }
     else if (USR_CHOICE == 1) {
         
-        test3 = "O" + test3;
+        // test3 = "O" + test3;
         textTwoFactory->setGreen(1.0);
         textThreeFactory->setGreen(0.5);
     }
@@ -691,26 +719,58 @@ void battleSceneChoices() {
             textTwoFactory->setGreen(1.0);
             textThreeFactory->setGreen(0.5);
         };
+
     } else if (menu.compare("choose_attack") == 0) {
 
-        p1HP->setText(std::to_string(playerTeam[0]->GetHP()));
-        p2HP->setText(std::to_string(playerTeam[1]->GetHP()));
-        p3HP->setText(std::to_string(playerTeam[2]->GetHP()));
-        p4HP->setText(std::to_string(playerTeam[3]->GetHP()));
+        int tmp1Hp;
+        int tmp2Hp;
+        int tmp3Hp;
+        int tmp4Hp;
 
-        if (enemyDefeated()) {
+        if (playerTeam[0]->GetHP() < 0) {
+            tmp1Hp = 0;
+        } else {
+            tmp1Hp = playerTeam[0]->GetHP();
+        }
+
+        if (playerTeam[1]->GetHP() < 0) {
+            tmp2Hp = 0;
+        } else {
+            tmp2Hp = playerTeam[1]->GetHP();
+        }
+
+        if (playerTeam[2]->GetHP() < 0) {
+            tmp3Hp = 0;
+        } else {
+            tmp3Hp = playerTeam[2]->GetHP();
+        }
+
+        if (playerTeam[3]->GetHP() < 0) {
+            tmp4Hp = 0;
+        } else {
+            tmp4Hp = playerTeam[3]->GetHP();
+        }
+
+        p1HP->setText(std::to_string(tmp1Hp));
+        p2HP->setText(std::to_string(tmp2Hp));
+        p3HP->setText(std::to_string(tmp3Hp));
+        p4HP->setText(std::to_string(tmp4Hp));
+
+        if (playerDefeated()) {
             current_scene = "game_over_scene";
             return;
-        } else if (playerDefeated()) {
+        } else if (enemyDefeated()) {
+            std::cout << "729 enemy defeated here.. " << std::endl;
 
-            current_scene = "victory_scene";
+            SCENE_NO = sceneResults.at(0);
+            USR_CHOICE = 0;
+            // current_scene = "victory_scene";
 
             for (unsigned int i=0; i < playerTeam_size; i++) {
                 playerTeam[i]->Heal(9999);
             }
-
-            for (unsigned int i=0; i < enemyTeam_size; i++) {
-                delete enemyTeam[i];
+            while (!turnQueue.empty()) {
+                turnQueue.pop();
             }
 
             return;
@@ -869,20 +929,32 @@ void renderFn() {
     // 
     if (STEP % 200000 == 0) {
 
+         mainDb.getSceneNoData(SCENE_NO);
          dialogue = mainDb.getSceneDialogue(SCENE_NO);// <--
          choices = mainDb.getSceneChoices(SCENE_NO);
          sceneResults = mainDb.getSceneChoices_Result(SCENE_NO);
 
+         std::string check_scene = mainDb.getSceneType_Scene(SCENE_NO);
+         current_scene = check_scene;
+
+         std::cout << "SCENE_NO: " << SCENE_NO << std::endl;
+         std::cout << "check_scene: " << check_scene << std::endl;
+         // std::cout << "current_scene: " << current_scene << std::endl;
+
         // Render scene
-        if ((current_scene.compare("start_scene") == 0) && (current_scene.compare(globalScene->name) !=0)) {
+        if ((current_scene.compare("start_scene") == 0) && (current_scene != globalScene->name)) {
             globalScene = new StartScene();
         }
 
-        else if ((current_scene.compare("tavern_scene") == 0) && (current_scene.compare(globalScene->name) != 0)) {
+        else if ((current_scene.compare("tavern_scene") == 0) && (current_scene != globalScene->name)) {
             globalScene = new TavernScene();
         }
 
-        else if ((current_scene.compare("battle_scene") == 0) && (current_scene.compare(globalScene->name) != 0)) {
+        else if (
+                (current_scene == "forest_scene" || current_scene == "catacombs_scene" || current_scene == "tower_scene") && (current_scene.compare(globalScene->name) != 0)
+                ) {
+            std::cout << "glob name: " << globalScene->name << std::endl;
+            std::cout << "making new battle scene" << std::endl;
             globalScene = new BattleScene();
         }
 
@@ -894,6 +966,7 @@ void renderFn() {
             globalScene = new VictoryScene();
         }
 
+
         // TODO: Incorporate into a single variable called update
         // on start scene
         // Updates Screen based on listened variables
@@ -901,9 +974,11 @@ void renderFn() {
             startSceneChoices();
 
         } else if (current_scene.compare("tavern_scene") == 0) {
+            std::cout << "tavern scene choices running" << std::endl;
             tavernSceneChoices();
+            std::cout << "done running " << std::endl;
         }
-        else if ((current_scene.compare("battle_scene") == 0)) {
+        else if (current_scene == "forest_scene" || current_scene == "catacombs_scene" || current_scene == "tower_scene") {
             battleSceneChoices();
         }
         else if ((current_scene.compare("victory_scene")==0)) {
@@ -939,11 +1014,19 @@ void handleStartSceneInput(int key) {
 void handleTavernSceneInput(int key) {
 
    if (key == 'a') {
+       std::cout << "USR_CHOICE" << std::endl;
        if (USR_CHOICE == 0) {
-           current_scene = "battle_scene";
+           SCENE_NO = sceneResults.at(0);
+           // current_scene = choices.at(0);
+           // current_scene = "battle_scene";
        }
        else if (USR_CHOICE == 1) {
-           current_scene = "game_over_scene";
+           std::cout << "SETTING USER CHOICE " << std::endl;
+           SCENE_NO = sceneResults.at(1);
+           // USCENE_NO = sceneResults.at(2);
+           std::cout << "scene_no: " << SCENE_NO << std::endl;
+           // current_scene = choices.at(1);
+           // current_scene = "game_over_scene";
        };
    }
 };
@@ -993,17 +1076,22 @@ void handleBattleSceneInput(int key) {
 
            // check enemy or player status
            if (enemyDefeated()) {
+               std::cout << "enemy defeated" << std::endl;
                current_scene = "victory_scene";
+
+                while (!turnQueue.empty()) {
+                    turnQueue.pop();
+                }
 
            } else if (playerDefeated()) {
                current_scene = "game_over_scene";
            }
 
-           // menu accept dialogue is x monster is going to attack
+       // menu accept dialogue is x monster is going to attack
        } else if (menu == "monster_accept_dialogue") {
-            target = rand() % playerTeam_size;
-           globalDamage = currEntity->action1->Act(currEntity, playerTeam, target);
 
+           target = rand() % playerTeam_size;
+           globalDamage = currEntity->action1->Act(currEntity, playerTeam, target);
            menu = "monster_dmg_dialogue";
 
        } else if (menu == "player_attack_dialogue") {
@@ -1029,7 +1117,7 @@ void keyboard(unsigned char key, int x, int y)
    else if (current_scene.compare("tavern_scene") == 0) {
        handleTavernSceneInput(key);
     
-   } else if (current_scene.compare("battle_scene") == 0) {
+   } else if (current_scene == "forest_scene" || current_scene == "catacombs_scene" || current_scene == "tower_scene") {
        handleBattleSceneInput(key);
    }
    else if (current_scene.compare("game_over_scene") == 0) {
@@ -1051,8 +1139,8 @@ void keyboard(unsigned char key, int x, int y)
        }
    } else if (current_scene == "victory_scene") {
        if (key == 'a') {
-           current_scene = "tavern_scene";
-           // Load in from CSV loader
+           SCENE_NO = sceneResults.at(0);
+           USR_CHOICE = 0;
        }
    };
 
@@ -1060,6 +1148,7 @@ void keyboard(unsigned char key, int x, int y)
 
 
 void tavernSpecialKeyboard(int key) {
+
      if (key == GLUT_KEY_UP) {
 
             sfxThreadTwo = std::thread(playClick);
@@ -1080,7 +1169,7 @@ void tavernSpecialKeyboard(int key) {
             sfxThreadTwo.detach();
 
             if (USR_CHOICE == 1) {
-                menu = "choose_attack";
+                // menu = "choose_attack";
                 USR_CHOICE = 0;
             }
 
@@ -1172,7 +1261,7 @@ void battleSpecialKeyboard(int key) {
 void specialKeyboard(int key, int x, int y) {
     if (current_scene == "tavern_scene") {
         tavernSpecialKeyboard(key);
-    } else if (current_scene == "battle_scene") {
+    } else if (current_scene == "forest_scene" || current_scene == "catacombs_scene" || current_scene == "tower_scene") {
         battleSpecialKeyboard(key);
     }
    
@@ -1261,6 +1350,8 @@ int main(int argc, char** argv)
    glutIdleFunc(renderFn);
 
    glutMainLoop();
+
+   std::cout << "does it end here??? " << std::endl;
 
    return 0;
 }
