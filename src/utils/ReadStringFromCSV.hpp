@@ -54,6 +54,11 @@ class SceneDataBase {
         }
 
         std::vector<std::string> getSceneNoData(int sceneNo) { //returns the row (vector<string>) at the specified sceneNo
+
+            for (unsigned int i=0; i < this->db.at(sceneNo+1).size(); i++) {
+                std::cout << "check-" << i << ": " << this->db.at(sceneNo+1).at(i) << std::endl;
+            }
+
             return this->db.at(sceneNo + 1);
         }
 
@@ -74,7 +79,9 @@ class SceneDataBase {
 	    std::vector<int> tempVector;
 	    std::string temp1 = db.at(sceneNo + 1).at(4);
 	    std::string temp2 = db.at(sceneNo + 1).at(5);
-            int result1 = std::stoi(temp1);
+        std::cout << "temp1: " << temp1 << std::endl;
+        std::cout << "temp2: " << temp2 << std::endl;
+        int result1 = std::stoi(temp1);
 	    int result2 = std::stoi(temp1);
 	    tempVector.push_back(result1);
 	    tempVector.push_back(result2);            

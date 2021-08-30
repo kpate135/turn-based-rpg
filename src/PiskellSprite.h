@@ -15,9 +15,14 @@
 #include "sprite/Battle_Scene.c"
 #include "sprite/Catacombs_Scene.c"
 #include "sprite/HAUNTED_COFFIN.c"
+#include "sprite/Haunted_Armor.c"
+#include "sprite/HAUNTED_HAMMER.c"
+#include "sprite/COVID_ILL_MAN.c"
 #include "sprite/GRAVE_ROBBER.c"
 #include "sprite/RAT.c"
 #include "sprite/victory_text.c"
+#include "sprite/Forest_Scene.c"
+#include "sprite/Tower_Scene.c"
 
 
 
@@ -880,6 +885,166 @@ class HauntedCoffin : public Sprite {
         };
 };
 
+class HauntedArmor : public Sprite {
+
+    static const int frameCount = HAUNTED_ARMOR_FRAME_COUNT;
+    static const int frameWidth = HAUNTED_ARMOR_FRAME_WIDTH;
+    static const int frameHeight = HAUNTED_ARMOR_FRAME_HEIGHT;
+
+    GLubyte sprite[frameHeight][frameWidth][4];
+
+
+    const uint32_t *data;
+
+    public:
+
+        HauntedArmor() {
+
+            name = "Haunted Armor";
+            
+            uint32_t red_mask = 0x000000ff;
+            int row = frameHeight;
+
+            this->data = &haunted_armor_data[0][0];
+            for (unsigned int i=0; i < this->frameWidth*this->frameHeight; i++) {
+
+                unsigned int img_red = red_mask & *(this->data + i);
+
+                unsigned int img_green = red_mask & (*(this->data + i) >> 4*2);
+                unsigned int img_blue = red_mask & (*(this->data + i) >> 4*4);
+                unsigned int img_alpha = red_mask & (*(this->data + i) >> 4*6);
+
+                int col = i % (this->frameWidth);
+
+                if (i % this->frameWidth == 0) {
+                    row -= 1;
+                }
+
+                // Row and on this column = pixel
+                sprite[row][col][0] = img_red; // 0-255
+                sprite[row][col][1] = img_green;
+                sprite[row][col][2] = img_blue;
+                sprite[row][col][3] = img_alpha; // Transparency
+            };
+        };
+
+        // Make should return sprite, frameHeight, frameWidth
+        void make() {
+            glRasterPos2i(this->xPos, this->yPos);
+            glDrawPixels(this->frameWidth,
+                        this->frameHeight, GL_RGBA,
+                        GL_UNSIGNED_BYTE, this->sprite);
+
+        };
+};
+
+class HauntedHammer : public Sprite {
+
+    static const int frameCount = HAUNTED_HAMMER_FRAME_COUNT;
+    static const int frameWidth = HAUNTED_HAMMER_FRAME_WIDTH;
+    static const int frameHeight = HAUNTED_HAMMER_FRAME_HEIGHT;
+
+    GLubyte sprite[frameHeight][frameWidth][4];
+
+
+    const uint32_t *data;
+
+    public:
+
+        HauntedHammer() {
+
+            name = "Haunted Hammer";
+            
+            uint32_t red_mask = 0x000000ff;
+            int row = frameHeight;
+
+            this->data = &haunted_hammer_data[0][0];
+            for (unsigned int i=0; i < this->frameWidth*this->frameHeight; i++) {
+
+                unsigned int img_red = red_mask & *(this->data + i);
+
+                unsigned int img_green = red_mask & (*(this->data + i) >> 4*2);
+                unsigned int img_blue = red_mask & (*(this->data + i) >> 4*4);
+                unsigned int img_alpha = red_mask & (*(this->data + i) >> 4*6);
+
+                int col = i % (this->frameWidth);
+
+                if (i % this->frameWidth == 0) {
+                    row -= 1;
+                }
+
+                // Row and on this column = pixel
+                sprite[row][col][0] = img_red; // 0-255
+                sprite[row][col][1] = img_green;
+                sprite[row][col][2] = img_blue;
+                sprite[row][col][3] = img_alpha; // Transparency
+            };
+        };
+
+        // Make should return sprite, frameHeight, frameWidth
+        void make() {
+            glRasterPos2i(this->xPos, this->yPos);
+            glDrawPixels(this->frameWidth,
+                        this->frameHeight, GL_RGBA,
+                        GL_UNSIGNED_BYTE, this->sprite);
+
+        };
+};
+
+
+class CovidIllMan : public Sprite {
+
+    static const int frameCount = COVID_ILL_MAN_FRAME_COUNT;
+    static const int frameWidth = COVID_ILL_MAN_FRAME_WIDTH;
+    static const int frameHeight = COVID_ILL_MAN_FRAME_HEIGHT;
+
+    GLubyte sprite[frameHeight][frameWidth][4];
+
+
+    const uint32_t *data;
+
+    public:
+
+        CovidIllMan() {
+
+            name = "CovidIllMan";
+            
+            uint32_t red_mask = 0x000000ff;
+            int row = frameHeight;
+
+            this->data = &covid_ill_man_data[0][0];
+            for (unsigned int i=0; i < this->frameWidth*this->frameHeight; i++) {
+
+                unsigned int img_red = red_mask & *(this->data + i);
+
+                unsigned int img_green = red_mask & (*(this->data + i) >> 4*2);
+                unsigned int img_blue = red_mask & (*(this->data + i) >> 4*4);
+                unsigned int img_alpha = red_mask & (*(this->data + i) >> 4*6);
+
+                int col = i % (this->frameWidth);
+
+                if (i % this->frameWidth == 0) {
+                    row -= 1;
+                }
+
+                // Row and on this column = pixel
+                sprite[row][col][0] = img_red; // 0-255
+                sprite[row][col][1] = img_green;
+                sprite[row][col][2] = img_blue;
+                sprite[row][col][3] = img_alpha; // Transparency
+            };
+        };
+
+        // Make should return sprite, frameHeight, frameWidth
+        void make() {
+            glRasterPos2i(this->xPos, this->yPos);
+            glDrawPixels(this->frameWidth,
+                        this->frameHeight, GL_RGBA,
+                        GL_UNSIGNED_BYTE, this->sprite);
+
+        };
+};
+
 
 class GraveRobber : public Sprite {
 
@@ -991,7 +1156,119 @@ class CatacombsBackground : public Sprite {
         };
 };
 
+class ForestBackground : public Sprite {
 
+    static const int frameCount = FOREST_SCENE_FRAME_COUNT;
+    static const int frameWidth = FOREST_SCENE_FRAME_WIDTH;
+    static const int frameHeight = FOREST_SCENE_FRAME_HEIGHT;
+
+    GLubyte sprite[frameHeight][frameWidth][4];
+
+
+    const uint32_t *data;
+
+    public:
+
+        ForestBackground() {
+            
+            name = "ForestBackground";
+
+            uint32_t red_mask = 0x000000ff;
+            int row = frameHeight;
+
+            this->data = &forest_scene_data[0][0];
+            for (unsigned int i=0; i < this->frameWidth*this->frameHeight; i++) {
+
+                unsigned int img_red = red_mask & *(this->data + i);
+
+                // Bit shifting for 2 slots on hexadecimal
+                // per color each position on hexidecimal is 4 bits.
+                // Apply the red mask to get back decimal value
+                // to obtain 0-255 rgb format
+                unsigned int img_green = red_mask & (*(this->data + i) >> 4*2);
+                unsigned int img_blue = red_mask & (*(this->data + i) >> 4*4);
+                unsigned int img_alpha = red_mask & (*(this->data + i) >> 4*6);
+
+                int col = i % (this->frameWidth);
+
+                if (i % this->frameWidth == 0) {
+                    row -= 1;
+                }
+
+                // Row and on this column = pixel
+                sprite[row][col][0] = img_red; // 0-255
+                sprite[row][col][1] = img_green;
+                sprite[row][col][2] = img_blue;
+                sprite[row][col][3] = img_alpha; // Transparency
+            };
+        };
+
+        // Make should return sprite, frameHeight, frameWidth
+        void make() {
+            glRasterPos2i(BACKGROUND_BORDER, 300-120);
+            glDrawPixels(this->frameWidth,
+                        this->frameHeight, GL_RGBA,
+                        GL_UNSIGNED_BYTE, this->sprite);
+
+        };
+};
+
+class TowerBackground : public Sprite {
+
+    static const int frameCount = TOWER_SCENE_FRAME_COUNT;
+    static const int frameWidth = TOWER_SCENE_FRAME_WIDTH;
+    static const int frameHeight = TOWER_SCENE_FRAME_HEIGHT;
+
+    GLubyte sprite[frameHeight][frameWidth][4];
+
+
+    const uint32_t *data;
+
+    public:
+
+        TowerBackground() {
+            
+            name = "TowerBackground";
+
+            uint32_t red_mask = 0x000000ff;
+            int row = frameHeight;
+
+            this->data = &tower_scene_data[0][0];
+            for (unsigned int i=0; i < this->frameWidth*this->frameHeight; i++) {
+
+                unsigned int img_red = red_mask & *(this->data + i);
+
+                // Bit shifting for 2 slots on hexadecimal
+                // per color each position on hexidecimal is 4 bits.
+                // Apply the red mask to get back decimal value
+                // to obtain 0-255 rgb format
+                unsigned int img_green = red_mask & (*(this->data + i) >> 4*2);
+                unsigned int img_blue = red_mask & (*(this->data + i) >> 4*4);
+                unsigned int img_alpha = red_mask & (*(this->data + i) >> 4*6);
+
+                int col = i % (this->frameWidth);
+
+                if (i % this->frameWidth == 0) {
+                    row -= 1;
+                }
+
+                // Row and on this column = pixel
+                sprite[row][col][0] = img_red; // 0-255
+                sprite[row][col][1] = img_green;
+                sprite[row][col][2] = img_blue;
+                sprite[row][col][3] = img_alpha; // Transparency
+            };
+        };
+
+        // Make should return sprite, frameHeight, frameWidth
+        void make() {
+            glRasterPos2i(BACKGROUND_BORDER, 300-120);
+            glDrawPixels(this->frameWidth,
+                        this->frameHeight, GL_RGBA,
+                        GL_UNSIGNED_BYTE, this->sprite);
+
+        };
+};
 
 
 #endif

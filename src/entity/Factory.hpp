@@ -33,6 +33,7 @@ class EntityFactory : public AbstractFactory {
 		return MakeByID(99);
 	}
 	Entity* MakeByID(int id) override {
+            std::cout << "== id ==: "<< id << std::endl;
 		switch (id) {
 			
 			case 1:
@@ -158,6 +159,7 @@ class PowerGemFactory {
 		~PowerGemFactory() {}
 		PowerGem* MakeByArea(std::string area) {
 			if (area == "Forest") {
+                std::cout << "making forest" << std::endl;
 				return MakeByID(rand() % 4 + 1);
 			}
 			if (area == "Catacombs") {
