@@ -56,7 +56,7 @@ To run the game, run the command `./a.out`.
 
 # Demo
 
-![gifdemo](game.gif)
+![gifdemo](src/game.gif)
 
 
 
