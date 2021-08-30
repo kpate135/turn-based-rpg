@@ -13,6 +13,9 @@
 using namespace std;
 
 string currentScene = "";
+
+int SCENE_NO = 0;
+
 bool waitInput;
 int USR_CHOICE = 0;
 bool isPlayer = true;
@@ -24,6 +27,10 @@ bool inBattle = false;
 bool battleOver = false;
 bool turnTaken = false;
 bool confirm = false;
+bool stop_battle = false;
+
+bool textCompleted = true;
+
 int MAX_TEAM_CAPACITY = 4;
 int playerTeam_size = 0;
 int enemyTeam_size = 0;
@@ -34,7 +41,7 @@ Entity* targetEntity = nullptr;
 int target;
 
 int globalDamage = 0;
-int battleChoice = 4;
+int battleChoice = 1;
 
 
 void OrderQueue_() {
@@ -113,8 +120,10 @@ void CheckEnemyHP() {
 
 bool PlayerTurn() {
     
-    confirm = true; // testing purpsoes
-    battleChoice = USR_CHOICE+1;
+    //
+    // confirm = false; // testing purpsoes
+
+    // battleChoice = USR_CHOICE+1; // <-- its ok
 
     if (battleChoice == 0) return true; // Do nothing option
     if (battleChoice == 7) CheckTeamHP(); 
@@ -174,9 +183,12 @@ void EnemyTurn() {
     if (!someoneIsAlive) return;
 
     while (playerTeam[target]->IsDead()) target = rand() % playerTeam_size;
+
     if (currEntity->action1->GetTargettingInfo() == "singleAttack") {
         if ((target <= playerTeam_size) && confirm) {
             cout << currEntity->GetName() + " " + currEntity->action1->BeingUsed() + " " + playerTeam[target]->GetName() << endl;
+
+            // std::cout << "currEntity: " <<
             globalDamage = currEntity->action1->Act(currEntity, playerTeam, target);
             cout << "Which dealt " << globalDamage << " points of damage" << endl;
             targetEntity = playerTeam[target];
@@ -207,11 +219,15 @@ bool TakeTurn() {
     cout << endl;
 
     if (!isPlayer) {
-        EnemyTurn();
+        EnemyTurn(); // <-- taking turn?
         cout << currEntity->GetName() + " completed their turn" << endl;
         return true;
     }
-    return PlayerTurn();
+
+    bool checkPlayerTurn = PlayerTurn();
+
+    std::cout << "checkPlayerTurn: " << checkPlayerTurn << std::endl;
+    return checkPlayerTurn;
 }
 
 enum states_Battle { SM_NotInBattle, SM_QueueTurn, SM_TakeTurn, SM_CheckBattleStatus, SM_BattleFinished } currState;
@@ -226,14 +242,25 @@ void turn_SM() {
         std::cout << "== SMcurrEntity==: " << currEntity->GetName() << std::endl;
     };
 
+    if (!confirm) stop_battle = false;
+    std::cout << "Before stop battle" << std::endl;
+    if (stop_battle) return;
+    std::cout << "After stop battle" << std::endl;
+    if (confirm) stop_battle = true;
+
+    std::cout << "before textCompleted" << std::endl;
+    if (!textCompleted) return;
+    std::cout << "after textCompleted" << std::endl;
+
+
     switch (currState) {
 
         case SM_NotInBattle:
 
             if (inBattle){
                 currState = SM_QueueTurn;
-                std::cout <<" changing to queue_turn" << std::endl;
-                std::cout << "currState: " << currState << std::endl;
+                // std::cout <<" changing to queue_turn" << std::endl;
+                // std::cout << "currState: " << currState << std::endl;
             };
 
             break;
@@ -259,7 +286,9 @@ void turn_SM() {
 
         case SM_TakeTurn:
 
+            std::cout << "IN SM_TakeTurn" << std::endl;
             if (turnTaken) currState = SM_CheckBattleStatus;
+            // currState = SM_CheckBattleStatus;
 
             break;
 
@@ -277,6 +306,7 @@ void turn_SM() {
                     currState = SM_TakeTurn;
                 }
                 else currState = SM_QueueTurn;
+                std::cout << "setting Queue Turn" << std::endl;
 
             }
 
@@ -287,6 +317,8 @@ void turn_SM() {
             break;
 
     }
+    // Back to back switch statement runs?
+    std::cout << " === inbetween state ===: " << currState << std::endl;
 
     switch (currState) {
 
@@ -298,10 +330,12 @@ void turn_SM() {
             break;
 
         case SM_TakeTurn:
+            std::cout << "second switch statement TakeTurn" << std::endl;
             turnTaken = TakeTurn();
             break;
 
         case SM_CheckBattleStatus:
+            textCompleted = false;
             turnTaken = false;
             battleOver = (playerDefeated() || enemyDefeated());
             break;
@@ -319,7 +353,6 @@ void turn_SM() {
     }
 
     std::cout << "turned the SM" << std::endl;
-
 }
 
 bool gettingLoot = false; // new for loot
@@ -352,7 +385,9 @@ void loot_SM(PowerGemFactory pf, ArmorFactory af) {
             if (!confirm) stop = false;
             if (stop) return;
 
-            cout << "Equip(0) or discard(1)?" << endl; cin >> USR_CHOICE; cout << endl; confirm = true; // testing
+            cout << "Equip(0) or discard(1)?" << endl;
+            // cin >> USR_CHOICE;
+            cout << endl; confirm = true; // testing
             if ((USR_CHOICE == 0) && confirm) {
                 stop = true;
                 currState_loot = SM_Yes;

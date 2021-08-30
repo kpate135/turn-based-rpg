@@ -21,8 +21,14 @@
 #include <vector>
 #include <thread>
 
+#include "utils/ReadStringFromCSV.hpp"
+
 
 // TODO: Fix game volume
+
+std::string dialogue;
+std::vector<std::string> choices;
+std::vector<int> sceneResults;
 
 // GLOBALS
 int STEP = 0;
@@ -58,6 +64,12 @@ std::string playerFourHP = "";
 
 
 std::vector<std::string> playerNames;
+CharacterFactory characterFactory;
+EntityFactory entityFactory;
+PowerGemFactory powerGemFactory;
+ArmorFactory armorFactory;
+
+SceneDataBase mainDb = SceneDataBase("db.csv");
 
 bool entityIsCharacter(Entity* entity) {
 
@@ -240,22 +252,57 @@ TextNumber *monsterHPIndicator = new TextNumber(&monsterHealth);
 TextNumber *dmgIndicator = new TextNumber(&dmgeDone);
 TextNumber *textNumFactory = new TextNumber(&testNum);
 
+TextNumber *p1HP = new TextNumber(&playerOneHP);
+TextNumber *p2HP = new TextNumber(&playerTwoHP);
+TextNumber *p3HP = new TextNumber(&playerThreeHP);
+TextNumber *p4HP = new TextNumber(&playerFourHP);
+
+
+Text *p1Name = new Text(&playerOneName);
+Text *p2Name = new Text(&playerTwoName);
+Text *p3Name = new Text(&playerThreeName);
+Text *p4Name = new Text(&playerFourName);
+
 GLubyte sprite[TAVERN_SCENE_FRAME_HEIGHT][TAVERN_SCENE_FRAME_WIDTH][4];
 
 
 // Character information
+/*
 CharacterFactory characterFactory;
 EntityFactory entityFactory;
 PowerGemFactory powerGemFactory;
 ArmorFactory armorFactory;
+*/
 
 Character *mainCharacter = characterFactory.MakeByID(8);
+
+class PlayerBattleIndicator : Sprite {
+
+    public:
+
+        Text* currPlayer;
+        TextNumber* currHp;
+
+        PlayerBattleIndicator(Text *playerName, TextNumber* playerHP) {
+            this->currPlayer = playerName;
+            this->currHp = playerHP;
+        }
+
+        void make() {
+            this->currPlayer->make();
+            this->currHp->make();
+        }
+
+};
 
 class StartScene : public Scene {
 
     public:
 
       StartScene() : Scene() {
+
+          textOneFactory->setText(dialogue);
+          // textTwoFactory->setText(dialogue);
 
           this->name = "start_scene";
           textOneFactory->setXPos(315);
@@ -318,7 +365,6 @@ class TavernScene : public Scene {
             this->sprites.push_back(textTwoFactory);
             this->sprites.push_back(textThreeFactory);
         }
-
 };
 
 
@@ -417,6 +463,80 @@ class BattleScene : public Scene {
 
             // Show damage on screen
             this->sprites.push_back(dmgIndicator);
+
+            p1Name->setRed(0);
+            p1Name->setBlue(0);
+
+            p2Name->setRed(0);
+            p2Name->setBlue(0);
+
+            p3Name->setRed(0);
+            p3Name->setBlue(0);
+
+            p4Name->setRed(0);
+            p4Name->setBlue(0);
+
+            p1HP->setGreen(0);
+            p1HP->setBlue(0);
+
+            p2HP->setGreen(0);
+            p2HP->setBlue(0);
+
+            p3HP->setGreen(0);
+            p3HP->setBlue(0);
+
+            p4HP->setGreen(0);
+            p4HP->setBlue(0);
+
+
+            // Add player hp here.
+            p1Name->setXPos(400);
+            p1Name->setYPos(100);
+
+            p2Name->setXPos(500);
+            p2Name->setYPos(100);
+
+            p3Name->setXPos(600);
+            p3Name->setYPos(100);
+
+            p4Name->setXPos(700);
+            p4Name->setYPos(100);
+
+            p1HP->setXPos(400);
+            p1HP->setYPos(50);
+
+            p2HP->setXPos(500);
+            p2HP->setYPos(50);
+
+            p3HP->setXPos(600);
+            p3HP->setYPos(50);
+
+            p4HP->setXPos(700);
+            p4HP->setYPos(50);
+
+            this->sprites.push_back(p1Name);
+            this->sprites.push_back(p2Name);
+            this->sprites.push_back(p3Name);
+            this->sprites.push_back(p4Name);
+
+            this->sprites.push_back(p1HP);
+            this->sprites.push_back(p2HP);
+            this->sprites.push_back(p3HP);
+            this->sprites.push_back(p4HP);
+
+            //this->sprites.push_back(p2Name);
+
+            /*
+            playerTwoName->setXPos();
+            playerTwoHP->setYPos();
+
+            playerThreeName->setXPos();
+            playerThreeHP->setYPos();
+
+            playerFourName->setXPos();
+            playerFourHP->setYPos();
+            */
+
         };
 };
 
@@ -459,6 +579,7 @@ class GameOverScene : public Scene {
             this->sprites.push_back(gameOverText);
             this->sprites.push_back(dialogueBox);
             this->sprites.push_back(textOneFactory);
+
         };
 
 };
@@ -490,7 +611,9 @@ void reshape(int w, int h)
 
 void startSceneChoices() {
     if (test == "") {
-        test = "PRESS A TO START";
+
+      textOneFactory->setText(dialogue);
+      // test = "PRESS A TO START";
         test2 = "";
     } else {
         test = "";
@@ -500,15 +623,20 @@ void startSceneChoices() {
 
 void tavernSceneChoices() {
 
+    // mainDb;
+
     // Description of scene
-    test =  "YOU GAIN CONSCIOUS AND SEE A BARTENDER WORKING AWAY";
+    // test =  "YOU GAIN CONSCIOUS AND SEE A BARTENDER WORKING AWAY";
+
+    textOneFactory->setText(dialogue);
 
     // Options
-    test2 = " LOOK AROUND AND PONDER.";
-    test3 = " YOU GIVE UP";
+    textTwoFactory->setText(choices.at(0));
+    textThreeFactory->setText(choices.at(1));
+    // test2 = " LOOK AROUND AND PONDER.";
+    // test3 = " YOU GIVE UP";
 
     if (USR_CHOICE == 0){
-
         test2 = "O" + test2;
         textTwoFactory->setGreen(0.5);
         textThreeFactory->setGreen(1.0);
@@ -524,7 +652,37 @@ void tavernSceneChoices() {
 
 void battleSceneChoices() {
 
-    if (menu.compare("run_attack") == 0) {
+    // run every single loop if you are in a battle scene
+    //
+    //
+
+
+    if (turnQueue.empty() == true) {
+
+        OrderQueue_();
+
+    } else {
+
+        if (currEntity == nullptr) {
+            // currEntity = turnQueue.front();
+            while(turnQueue.front()->IsDead()) {
+                turnQueue.pop();
+                if (turnQueue.empty()) {
+                    OrderQueue_();
+                }
+            }
+            currEntity = turnQueue.front();
+            turnQueue.pop();
+        }
+
+    }
+
+        if (menu.compare("run_attack") == 0) {
+            p1HP->setText(std::to_string(playerTeam[0]->GetHP()));
+            p2HP->setText(std::to_string(playerTeam[1]->GetHP()));
+            p3HP->setText(std::to_string(playerTeam[2]->GetHP()));
+            p4HP->setText(std::to_string(playerTeam[3]->GetHP()));
+
         if (USR_CHOICE == 0) {
             textTwoFactory->setGreen(0.5);
             textThreeFactory->setGreen(1.0);
@@ -535,16 +693,41 @@ void battleSceneChoices() {
         };
     } else if (menu.compare("choose_attack") == 0) {
 
-	// TODO: Check for battle finished here
-        isPlayer = entityIsCharacter(turnQueue.front());
+        p1HP->setText(std::to_string(playerTeam[0]->GetHP()));
+        p2HP->setText(std::to_string(playerTeam[1]->GetHP()));
+        p3HP->setText(std::to_string(playerTeam[2]->GetHP()));
+        p4HP->setText(std::to_string(playerTeam[3]->GetHP()));
+
+        if (enemyDefeated()) {
+            current_scene = "game_over_scene";
+            return;
+        } else if (playerDefeated()) {
+
+            current_scene = "victory_scene";
+
+            for (unsigned int i=0; i < playerTeam_size; i++) {
+                playerTeam[i]->Heal(9999);
+            }
+
+            for (unsigned int i=0; i < enemyTeam_size; i++) {
+                delete enemyTeam[i];
+            }
+
+            return;
+        }
+
+        isPlayer = entityIsCharacter(currEntity);
+
         if (isPlayer == true) {
 
+            std::cout << "isPlayer GetName" << std::endl;
+            // Getting name of enemies
             textTwoFactory->setText(enemyTeam[0]->GetName());
             textThreeFactory->setText(enemyTeam[1]->GetName());
             textFourFactory->setText(enemyTeam[2]->GetName());
             textFiveFactory->setText(enemyTeam[3]->GetName());
 
-            std::string descr = "WHO DO YOU WANT " + turnQueue.front()->GetName() + " TO ATTACK";
+            std::string descr = "WHO DO YOU WANT " + currEntity->GetName() + " TO ATTACK";
 
             textOneFactory->setText(descr);
 
@@ -554,6 +737,9 @@ void battleSceneChoices() {
            int indYPos = globalScene->sprites.at(USR_CHOICE+1)->getYPos();
 
            // update chosen position
+
+            std::cout << "enemyTeam usr choice" << std::endl;
+           // Or here
            chosenIndicator->setText(enemyTeam[USR_CHOICE]->GetName() + " HP");
            chosenIndicator->setXPos(indXPos);
            chosenIndicator->setYPos(indYPos - 50);
@@ -574,14 +760,21 @@ void battleSceneChoices() {
 
             monsterHPIndicator->setText(std::to_string(monsterHP));
 
+            // Done displaying who to attack
 
         } else if (isPlayer == false) {
 
+            // turn_SM();
+
+
             // Mosnter accept dialogue
+
             menu = "monster_accept_dialogue";
 
             // Is taking their turn
-            textOneFactory->setText(turnQueue.front()->GetName() + " IS TAKING THEIR TURN");
+            //
+            // textOneFactory->setText(turnQueue.front()->GetName() + " IS TAKING THEIR TURN");
+            textOneFactory->setText(currEntity->GetName() + " IS TAKING THEIR TURN");
 
             chosenIndicator->setText("");
             monsterHPIndicator->setText("");
@@ -590,7 +783,9 @@ void battleSceneChoices() {
             textThreeFactory->setText("");
             textFourFactory->setText("");
             textFiveFactory->setText("");
-            turn_SM();
+            // std::cout << "currState: " << currState << std::endl;
+
+            // textCompleted = true;
         }
 
         if (USR_CHOICE == 0) {
@@ -615,33 +810,74 @@ void battleSceneChoices() {
             textThreeFactory->setGreen(1.0);
             textFourFactory->setGreen(1.0);
             textFiveFactory->setGreen(0.5);
+
+            // YOU ATTACKED
         }
 
     } else if (menu == "monster_dmg_dialogue") {
+
+        // turn_SM();
         dmgIndicator->setXPos(textOneFactory->getXPos()+20);
         dmgIndicator->setYPos(textOneFactory->getYPos()-20);
+
+        // <--
         dmgIndicator->setText(std::to_string(globalDamage));
+
         dmgIndicator->setRed(1);
         dmgIndicator->setGreen(0);
         dmgIndicator->setBlue(0);
 
-        textOneFactory->setText(
-                   currEntity->GetName() + " ATTACKED " + playerTeam[target]->GetName()
-                   + " FOR "
-       );
-    }
+        // ? Turn state machine one more time?
+        // ??
 
+        std::cout << "monster dmge dialogue get name" << std::endl;
+
+        if (currEntity != nullptr && playerTeam[target] != nullptr ) {
+            // They become the same for some reason??
+            textOneFactory->setText(
+                       currEntity->GetName() + " ATTACKED " + playerTeam[target]->GetName()
+                       + " FOR "
+           );
+
+        }
+    } else if (menu == "player_attack_dialogue") {
+        Entity *currentMonster = enemyTeam[battleChoice-1];
+       std::string descript = "YOU ATTACKED " + currentMonster->GetName();
+       textOneFactory->setText(descript);
+       textTwoFactory->setText("PRESS A TO CONTINUE");
+       textThreeFactory->setText("");
+       textFourFactory->setText("");
+       textFiveFactory->setText("");
+
+    }
 };
+
+void lootSceneChoices() {
+    if ((currState_loot == SM_NotLooting && gettingLoot)) {
+
+        textOneFactory->setText("GENERATING LOOP");
+        textTwoFactory->setText("PRESS A TO ACCEPT");
+        textThreeFactory->setText("");
+        textFourFactory->setText("");
+
+    }
+}
 
 
 void renderFn() {
 
+    // 
     if (STEP % 200000 == 0) {
+
+         dialogue = mainDb.getSceneDialogue(SCENE_NO);// <--
+         choices = mainDb.getSceneChoices(SCENE_NO);
+         sceneResults = mainDb.getSceneChoices_Result(SCENE_NO);
 
         // Render scene
         if ((current_scene.compare("start_scene") == 0) && (current_scene.compare(globalScene->name) !=0)) {
             globalScene = new StartScene();
         }
+
         else if ((current_scene.compare("tavern_scene") == 0) && (current_scene.compare(globalScene->name) != 0)) {
             globalScene = new TavernScene();
         }
@@ -671,7 +907,14 @@ void renderFn() {
             battleSceneChoices();
         }
         else if ((current_scene.compare("victory_scene")==0)) {
-            std::cout << "victory scene" << std::endl;
+
+            // std::cout << "victory scene" << std::endl;
+            // menu = "loot_menu";
+            // gettingLoot = true;
+
+            // lootSceneChoices();
+            // loot_SM(powerGemFactory, armorFactory);
+
         }
         else if ((current_scene.compare("game_over_scene") == 0)) {
             std::cout << "game_over_choices" << std::endl;
@@ -687,6 +930,8 @@ void renderFn() {
 void handleStartSceneInput(int key) {
     if (key == 'a') {
        current_scene = "tavern_scene";
+       SCENE_NO = sceneResults.at(0);
+       // mainDb.getSceneChoices_Result(SCENE_NO);
    }
 };
 
@@ -706,7 +951,11 @@ void handleTavernSceneInput(int key) {
 
 void handleBattleSceneInput(int key) {
 
+   // std::cout << "confirm: " << confirm << std::endl;
+
    if (key == 'a') {
+
+       confirm = true;
 
        if (menu == "run_attack") {
            if (USR_CHOICE == 0) {
@@ -720,66 +969,54 @@ void handleBattleSceneInput(int key) {
            }
 
        }
+
+       // IF MONSTER DO X IF PLAYER DO Y
        else if (menu == "choose_attack") {
 
-           Entity* currentMonster = globalScene->monsters.at(USR_CHOICE);
-           turn_SM();
+           // Entity* currentMonster = globalScene->monsters.at(USR_CHOICE);
+
+           // ->
+           // turn_SM();
 
            if (isPlayer) {
 
-               std::string descript = "YOU ATTACKED " + currentMonster->GetName();
-
-               textOneFactory->setText(descript);
-
-               // render attack here
-               renderAttack = true;
-
-               turn_SM(); // Turns the state machine
                playHit(); // this plays the adio
 
-               menu = "player_attack_dialogue";
+               globalDamage = currEntity->action1->Act(currEntity, enemyTeam, USR_CHOICE);
 
-              textTwoFactory->setText("PRESS A TO CONTINUE");
-              textThreeFactory->setText("");
-              textFourFactory->setText("");
-              textFiveFactory->setText("");
+               menu = "player_attack_dialogue";
            }
 
            else if (!isPlayer) {
-
-               // Note that currEntity is not accessible until
-               // Turing machine has turned
-               turn_SM();
-               std::cout << "currEntity: " << currEntity->GetName() << std::endl;
-               std::cout << "target: " << target << std::endl;
-           }
+               menu = "monster_accept_dialogue";
+          }
 
            // check enemy or player status
            if (enemyDefeated()) {
-               // do victory animation
                current_scene = "victory_scene";
-               turn_SM();
 
            } else if (playerDefeated()) {
-               // do defeat animation
                current_scene = "game_over_scene";
-               turn_SM();
            }
 
+           // menu accept dialogue is x monster is going to attack
        } else if (menu == "monster_accept_dialogue") {
+            target = rand() % playerTeam_size;
+           globalDamage = currEntity->action1->Act(currEntity, playerTeam, target);
+
            menu = "monster_dmg_dialogue";
 
        } else if (menu == "player_attack_dialogue") {
            menu = "choose_attack";
+           currEntity = nullptr;
+           // textCompleted = true;
        } else if (menu == "monster_dmg_dialogue") {
            menu = "choose_attack";
            dmgIndicator->setText("");
+           currEntity = nullptr;
+           // textCompleted = true;
        }
-       if (currState != SM_BattleFinished) {
-           turn_SM();
-       }
-   }
-
+  }
 };
 
 void keyboard(unsigned char key, int x, int y)
@@ -797,15 +1034,34 @@ void keyboard(unsigned char key, int x, int y)
    }
    else if (current_scene.compare("game_over_scene") == 0) {
        if (key == 'a') {
+
+           // delete[] playerTeam;
+           // delete[] enemyTeam;
+
+           delete currEntity;
+           delete targetEntity;
+
+           delete boxFactory;
+           delete logoFactory;
+           delete startBGFactory;
+           delete tavernBGFactory;
+           delete battleBGFactory;
+
            exit(0);
        }
-   }
+   } else if (current_scene == "victory_scene") {
+       if (key == 'a') {
+           current_scene = "tavern_scene";
+           // Load in from CSV loader
+       }
+   };
 
 }
 
 
 void tavernSpecialKeyboard(int key) {
      if (key == GLUT_KEY_UP) {
+
             sfxThreadTwo = std::thread(playClick);
             sfxThreadTwo.detach();
 
@@ -869,23 +1125,45 @@ void battleSpecialKeyboard(int key) {
 
         if(key == GLUT_KEY_UP) {
 
+            // click sound effect
             sfxThreadTwo = std::thread(playClick);
             sfxThreadTwo.detach();
+
+            --USR_CHOICE;
+            if (USR_CHOICE < 0) USR_CHOICE = 3;
+            --battleChoice;
+            if (battleChoice < 1) battleChoice = 4;
+
+            /*
             if (USR_CHOICE != 0) {
-                USR_CHOICE = (USR_CHOICE - 1) % 4;
+
+                // 
+                USR_CHOICE = (USR_CHOICE - 1) % 4; // mod 4
+                battleChoice = ((battleChoice -1) % 4) + 1;
+
             } else {
                 USR_CHOICE = 3;
+                battleChoice = 4;
             }
+            */
 
         } else if (key == GLUT_KEY_DOWN) {
 
+            // click sound effect
             sfxThreadTwo = std::thread(playClick);
             sfxThreadTwo.detach();
-            USR_CHOICE = (USR_CHOICE + 1) % 4;
+
+            ++USR_CHOICE;
+            if (USR_CHOICE > 3) USR_CHOICE = 0;
+            ++battleChoice;
+            if (battleChoice > 4) battleChoice = 1;
+
+            // USR_CHOICE = (USR_CHOICE + 1) % 4;
+            // battleChoice = ((battleChoice + 1) % 4) + 1;
         }
 
     } else if (menu == "accept_dialogue") {
-        USR_CHOICE = 0;
+        // USR_CHOICE = 0; // <--
     }
 
 };
@@ -900,6 +1178,10 @@ void specialKeyboard(int key, int x, int y) {
    
 };
 
+void handleClose() {
+    std::cout << "handling close" << std::endl;
+};
+
 
 /*  Main Loop
  *  Open window with initial window size, title bar, 
@@ -908,21 +1190,25 @@ void specialKeyboard(int key, int x, int y) {
 int main(int argc, char** argv)
 {
 
-    CharacterFactory characterFactory;
-    EntityFactory entityFactory;
-    PowerGemFactory powerGemFactory;
-    ArmorFactory armorFactory;
-
+    
     srand(time(0));
 
     currState = SM_NotInBattle;
     inBattle = true;
 
     playerTeam_size = 4;
+
     playerTeam[0] = characterFactory.MakeByID(1);
-    playerTeam[1] = characterFactory.MakeByID(4);
-    playerTeam[2] = characterFactory.MakeByID(2);
-    playerTeam[3] = characterFactory.MakeByID(7);
+    playerOneName = "BOB";
+
+    playerTeam[1] = characterFactory.MakeByID(3);
+    playerTwoName = "SETH";
+
+    playerTeam[2] = characterFactory.MakeByID(5);
+    playerThreeName = "WILL";
+
+    playerTeam[3] = characterFactory.MakeByID(6);
+    playerFourName = "RAWR";
 
     playerNames.push_back("BOB");
     playerNames.push_back("SAM");
@@ -948,6 +1234,9 @@ int main(int argc, char** argv)
     }
     */
 
+   // mainDb = SceneDataBase("db.csv");
+
+
    srand(time(0));
 
    glutInit(&argc, argv);
@@ -955,6 +1244,7 @@ int main(int argc, char** argv)
    glutInitWindowSize(800, 600);
    glutInitWindowPosition(100, 100);
    glutCreateWindow(argv[0]);
+   // glutCloseFunc(handleClose);
 
    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glEnable(GL_BLEND);
